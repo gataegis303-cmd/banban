@@ -34,6 +34,13 @@ class Settings(BaseSettings):
     jwt_refresh_expire_days: int = 30
     jwt_algorithm: str = "HS256"
 
+    # 短信验证码（限流与有效期）
+    sms_code_ttl_seconds: int = 300        # 验证码有效期 5 分钟
+    sms_send_cooldown_seconds: int = 60    # 同手机号重发间隔
+    sms_daily_limit: int = 10              # 同手机号每日上限
+    sms_ip_daily_limit: int = 20           # 同 IP 每日上限
+    sms_code_max_attempts: int = 5         # 单个验证码最大尝试次数
+
     # 阿里云短信
     aliyun_sms_access_key_id: str = ""
     aliyun_sms_access_key_secret: str = ""

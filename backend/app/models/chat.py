@@ -7,6 +7,7 @@ from datetime import datetime
 
 from sqlalchemy import (
     BigInteger,
+    DateTime,
     Enum,
     ForeignKey,
     Integer,
@@ -55,7 +56,7 @@ class Conversation(UUIDPKMixin, TimestampMixin, Base):
         Integer, default=0, server_default=text("0"), nullable=False,
     )
     last_message_text: Mapped[str | None] = mapped_column(Text)
-    last_message_at: Mapped[datetime | None] = mapped_column()
+    last_message_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
 
 # ── messages 表（seq 会话内严格递增，游标分页依据）────────────────

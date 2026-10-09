@@ -8,6 +8,7 @@ from datetime import date, datetime
 from sqlalchemy import (
     Boolean,
     Date,
+    DateTime,
     Enum,
     ForeignKey,
     Integer,
@@ -75,7 +76,7 @@ class UserPresence(Base):
     is_online: Mapped[bool] = mapped_column(
         Boolean, default=False, server_default=text("false"), nullable=False,
     )
-    last_seen_at: Mapped[datetime | None] = mapped_column()
+    last_seen_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
 
 # ── user_verifications 表（实名认证记录）──────────────────────
@@ -107,7 +108,7 @@ class RefreshToken(UUIDPKMixin, Base):
         ForeignKey("users.id", ondelete="CASCADE"), index=True, nullable=False,
     )
     token_hash: Mapped[str] = mapped_column(String(512), unique=True, index=True, nullable=False)
-    expires_at: Mapped[datetime] = mapped_column(nullable=False)
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     revoked: Mapped[bool] = mapped_column(
         Boolean, default=False, server_default=text("false"), nullable=False,
     )
