@@ -3,8 +3,7 @@ import SwiftUI
 /// 安全中心：账号状态 + 举报记录 / 黑名单 / 紧急联系人 / 帮助与反馈
 struct SafetyView: View {
     @Environment(\.dismiss) private var dismiss
-    @State private var showsComingSoon = false
-    @State private var comingSoonTitle: String?
+    @StateObject private var comingSoon = ComingSoonModel()
 
     var body: some View {
         VStack(spacing: 0) {
@@ -22,13 +21,7 @@ struct SafetyView: View {
         }
         .background(Color.banbanBackground.ignoresSafeArea())
         .navigationBarHidden(true)
-        .alert("功能开发中", isPresented: $showsComingSoon) {
-            Button("好的", role: .cancel) {}
-        } message: {
-            if let title = comingSoonTitle {
-                Text("「\(title)」即将上线，敬请期待")
-            }
-        }
+        .comingSoonAlert(comingSoon)
     }
 
     // MARK: - 头部
@@ -117,8 +110,4 @@ struct SafetyView: View {
         }
     }
 
-    private func comingSoon(_ title: String) {
-        comingSoonTitle = title
-        showsComingSoon = true
-    }
 }

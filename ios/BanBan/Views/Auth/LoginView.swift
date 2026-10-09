@@ -11,8 +11,7 @@ struct LoginView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var phone = ""
     @State private var agreed = false
-    @State private var showsComingSoon = false
-    @State private var comingSoonTitle: String?
+    @StateObject private var comingSoon = ComingSoonModel()
 
     private var isValid: Bool {
         phone.count == 11 && agreed
@@ -102,13 +101,7 @@ struct LoginView: View {
         .padding(.horizontal, 20)
         .background(Color.banbanBackground)
         .navigationBarBackButtonHidden(true)
-        .alert("功能开发中", isPresented: $showsComingSoon) {
-            Button("好的", role: .cancel) {}
-        } message: {
-            if let title = comingSoonTitle {
-                Text("「\(title)」即将上线，敬请期待")
-            }
-        }
+        .comingSoonAlert(comingSoon)
         .toolbar {
             // 数字键盘无收起键：提供「完成」按钮兜底
             ToolbarItemGroup(placement: .keyboard) {
@@ -118,8 +111,4 @@ struct LoginView: View {
         }
     }
 
-    private func comingSoon(_ title: String) {
-        comingSoonTitle = title
-        showsComingSoon = true
-    }
 }

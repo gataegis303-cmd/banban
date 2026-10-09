@@ -5,8 +5,7 @@ struct MessagesView: View {
     @EnvironmentObject private var appState: AppState
     @State private var path = NavigationPath()
     @State private var selectedTab = 0
-    @State private var showsComingSoon = false
-    @State private var comingSoonTitle: String?
+    @StateObject private var comingSoon = ComingSoonModel()
 
     var body: some View {
         NavigationStack(path: $path) {
@@ -27,13 +26,7 @@ struct MessagesView: View {
             }
             .background(Color.banbanBackground.ignoresSafeArea())
             .navigationBarHidden(true)
-            .alert("功能开发中", isPresented: $showsComingSoon) {
-                Button("好的", role: .cancel) {}
-            } message: {
-                if let title = comingSoonTitle {
-                    Text("「\(title)」即将上线，敬请期待")
-                }
-            }
+            .comingSoonAlert(comingSoon)
             .navigationDestination(for: String.self) { conversationID in
                 ChatView(conversationID: conversationID)
             }
@@ -114,13 +107,6 @@ struct MessagesView: View {
                 }
             }
         }
-    }
-}
-
-private extension MessagesView {
-    func comingSoon(_ title: String) {
-        comingSoonTitle = title
-        showsComingSoon = true
     }
 }
 

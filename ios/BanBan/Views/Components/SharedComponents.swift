@@ -763,6 +763,41 @@ struct FieldGroup<Content: View>: View {
     }
 }
 
+// MARK: - ComingSoon 反馈
+
+@MainActor
+final class ComingSoonModel: ObservableObject {
+    @Published var shows = false
+    @Published var title: String?
+
+    func callAsFunction(_ title: String) {
+        self.title = title
+        shows = true
+    }
+}
+
+private struct ComingSoonAlertModifier: ViewModifier {
+    @ObservedObject var model: ComingSoonModel
+
+    func body(content: Content) -> some View {
+        content
+            .alert("功能开发中", isPresented: $model.shows) {
+                Button("好的", role: .cancel) {}
+            } message: {
+                if let title = model.title {
+                    Text("「\(title)」即将上线，敬请期待")
+                }
+            }
+    }
+}
+
+extension View {
+    /// 挂载 ComingSoon alert：配合 `@StateObject private var comingSoon = ComingSoonModel()` 使用
+    func comingSoonAlert(_ model: ComingSoonModel) -> some View {
+        modifier(ComingSoonAlertModifier(model: model))
+    }
+}
+
 // MARK: - 键盘
 
 extension View {

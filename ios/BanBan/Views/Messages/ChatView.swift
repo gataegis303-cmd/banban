@@ -7,8 +7,7 @@ struct ChatView: View {
     @EnvironmentObject private var appState: AppState
     @Environment(\.dismiss) private var dismiss
     @State private var inputText = ""
-    @State private var showsComingSoon = false
-    @State private var comingSoonTitle: String?
+    @StateObject private var comingSoon = ComingSoonModel()
 
     private var conversation: Conversation? {
         appState.conversations.first { $0.id == conversationID }
@@ -28,13 +27,7 @@ struct ChatView: View {
         }
         .background(Color.banbanBackground.ignoresSafeArea())
         .navigationBarHidden(true)
-        .alert("功能开发中", isPresented: $showsComingSoon) {
-            Button("好的", role: .cancel) {}
-        } message: {
-            if let title = comingSoonTitle {
-                Text("「\(title)」即将上线，敬请期待")
-            }
-        }
+        .comingSoonAlert(comingSoon)
         .onAppear {
             appState.markConversationRead(conversationID)
         }
@@ -156,10 +149,6 @@ struct ChatView: View {
         inputText = ""
     }
 
-    private func comingSoon(_ title: String) {
-        comingSoonTitle = title
-        showsComingSoon = true
-    }
 }
 
 // MARK: - 消息行
