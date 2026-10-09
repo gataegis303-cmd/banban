@@ -12,11 +12,12 @@ struct PermissionsView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var location = true
     @State private var notification = true
+    // 演示用：无真实权限申请，仅还原交互流
     @State private var photos = true
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            CircleIconButton(icon: "chevron.left") { dismiss() }
+            CircleIconButton(icon: "chevron.left", label: "返回") { dismiss() }
 
             VStack(alignment: .leading, spacing: 8) {
                 Text("开启以下权限，体验更完整")
@@ -75,6 +76,7 @@ struct PermissionsView: View {
             Toggle("", isOn: isOn)
                 .labelsHidden()
                 .tint(Color.banbanPrimary)
+                .accessibilityLabel(title)
         }
         .padding(14)
         .background(Color.banbanCard)

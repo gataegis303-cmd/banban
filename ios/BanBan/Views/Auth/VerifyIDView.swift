@@ -26,7 +26,7 @@ struct VerifyIDView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            CircleIconButton(icon: "chevron.left") {
+            CircleIconButton(icon: "chevron.left", label: "返回") {
                 dismiss()
             }
 
@@ -128,7 +128,7 @@ struct VerifyIDView: View {
                         .foregroundStyle(Color.banbanForeground)
                     Text(subtitle)
                         .font(BanBanFont.caption)
-                        .foregroundStyle(isLocked ? Color.banbanMutedForeground : Color.banbanMutedForeground)
+                        .foregroundStyle(Color.banbanMutedForeground)
                 }
                 Spacer()
                 if let badge, !isDone {

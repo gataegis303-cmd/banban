@@ -8,18 +8,13 @@ enum WizardMode {
 
 // MARK: - 向导内部小组件（各步骤共用）
 
-/// 向导字段标题（原型 label 为 foreground 色）
+/// 向导字段标题（原型 label 为 foreground 色；复用 FieldGroup，仅覆盖间距与标题色）
 struct WizardFieldGroup<Content: View>: View {
     let title: String
     @ViewBuilder let content: Content
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Text(title)
-                .font(BanBanFont.label)
-                .foregroundStyle(Color.banbanForeground)
-            content
-        }
+        FieldGroup(title: title, spacing: 6, titleColor: .banbanForeground) { content }
     }
 }
 
@@ -106,6 +101,7 @@ struct WizardFlowView: View {
                 .padding(.horizontal, 20)
                 .padding(.top, 4)
                 .padding(.bottom, 24)
+                // 以步骤值为 id 强制重建视图：切换步骤时重置滚动位置与内部状态
                 .id(step)
             }
 

@@ -77,11 +77,11 @@ public enum BanBanColor {
     // *-subtle 在 .dark 有覆盖 → 动态色
 
     public static let success = Color(hex: "#34C759")            // Apple system green
-    public static let successForeground = Color(hex: "#FFFFFF")  // .dark 未覆盖，沿用浅色
+    public static let successForeground = Color(hex: "#FFFFFF")  // .dark 未覆盖，沿用浅色；预留：暂无消费方
     public static let successSubtle = banbanDynamicColor("#E9F9EE", "#142E1F")
 
     public static let warning = Color(hex: "#FF9500")            // Apple system orange
-    public static let warningForeground = Color(hex: "#1D1D1F")  // 橙底深字，.dark 未覆盖
+    public static let warningForeground = Color(hex: "#1D1D1F")  // 橙底深字，.dark 未覆盖；预留：暂无消费方
     public static let warningSubtle = banbanDynamicColor("#FFF2E0", "#33230E")
 
     public static let error = Color(hex: "#FF3B30")              // Apple system red
@@ -89,7 +89,7 @@ public enum BanBanColor {
     public static let errorSubtle = banbanDynamicColor("#FFECEA", "#331513")
 
     public static let info = Color(hex: "#007AFF")               // Apple system blue
-    public static let infoForeground = Color(hex: "#FFFFFF")     // .dark 未覆盖，沿用浅色
+    public static let infoForeground = Color(hex: "#FFFFFF")     // .dark 未覆盖，沿用浅色；预留：暂无消费方
     public static let infoSubtle = banbanDynamicColor("#E8F2FF", "#0F2338")
 }
 
@@ -100,15 +100,15 @@ public extension Color {
     static let banbanForeground = BanBanColor.foreground
     static let banbanCard = BanBanColor.card
     static let banbanCardForeground = BanBanColor.cardForeground
-    static let banbanPopover = BanBanColor.popover
-    static let banbanPopoverForeground = BanBanColor.popoverForeground
+    static let banbanPopover = BanBanColor.popover                 // 预留：暂无消费方
+    static let banbanPopoverForeground = BanBanColor.popoverForeground // 预留：暂无消费方
     static let banbanPrimary = BanBanColor.primary
     static let banbanPrimaryForeground = BanBanColor.primaryForeground
     static let banbanMuted = BanBanColor.muted
     static let banbanMutedForeground = BanBanColor.mutedForeground
     static let banbanBorder = BanBanColor.border
     static let banbanInput = BanBanColor.input
-    static let banbanRing = BanBanColor.ring
+    static let banbanRing = BanBanColor.ring                     // 预留：暂无消费方（输入框聚焦描边候选）
     static let banbanSuccess = BanBanColor.success
     static let banbanSuccessForeground = BanBanColor.successForeground
     static let banbanSuccessSubtle = BanBanColor.successSubtle
@@ -124,6 +124,7 @@ public extension Color {
 }
 
 // MARK: - 品牌阶（外观无关，静态）— 01 §3.3
+// 整阶预留：供图表/插画等深浅色无关场景取色，当前无消费方
 
 public enum BanBanBrandScale {
     public static let p50 = Color(hex: "#E8F2FF")
@@ -140,6 +141,7 @@ public enum BanBanBrandScale {
 }
 
 // MARK: - 中性阶（外观无关，静态）— 01 §3.4
+// 整阶预留：当前无消费方
 
 public enum BanBanNeutralScale {
     public static let n0 = Color(hex: "#FFFFFF")
@@ -160,7 +162,7 @@ public enum BanBanNeutralScale {
 // CSS .banban-text-* 基于系统字体栈（-apple-system / PingFang SC），原生端直接用语义字型即可自动跟随 Dynamic Type。
 
 public enum BanBanFont {
-    public static let display = Font.system(.largeTitle, design: .default).weight(.semibold)
+    public static let display = Font.system(.largeTitle, design: .default).weight(.semibold) // 预留：暂无消费方
     public static let h1 = Font.system(.title2, design: .default).weight(.semibold)
     public static let h2 = Font.system(.title3, design: .default).weight(.semibold)
     public static let bodyLarge = Font.body

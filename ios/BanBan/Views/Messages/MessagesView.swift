@@ -5,6 +5,8 @@ struct MessagesView: View {
     @EnvironmentObject private var appState: AppState
     @State private var path = NavigationPath()
     @State private var selectedTab = 0
+    @State private var showsComingSoon = false
+    @State private var comingSoonTitle: String?
 
     var body: some View {
         NavigationStack(path: $path) {
@@ -25,6 +27,13 @@ struct MessagesView: View {
             }
             .background(Color.banbanBackground.ignoresSafeArea())
             .navigationBarHidden(true)
+            .alert("功能开发中", isPresented: $showsComingSoon) {
+                Button("好的", role: .cancel) {}
+            } message: {
+                if let title = comingSoonTitle {
+                    Text("「\(title)」即将上线，敬请期待")
+                }
+            }
             .navigationDestination(for: String.self) { conversationID in
                 ChatView(conversationID: conversationID)
             }
@@ -39,7 +48,7 @@ struct MessagesView: View {
                 .font(BanBanFont.h2)
                 .foregroundStyle(Color.banbanForeground)
             Spacer()
-            CircleIconButton(icon: "bell") {}
+            CircleIconButton(icon: "bell", label: "通知") { comingSoon("消息通知") }
         }
         .padding(.horizontal, 20)
         .padding(.vertical, 12)
@@ -108,6 +117,13 @@ struct MessagesView: View {
     }
 }
 
+private extension MessagesView {
+    func comingSoon(_ title: String) {
+        comingSoonTitle = title
+        showsComingSoon = true
+    }
+}
+
 // MARK: - 会话行
 
 private struct ConversationRow: View {
@@ -147,7 +163,7 @@ private struct ConversationRow: View {
         if conversation.unreadCount > 0 {
             Text("\(conversation.unreadCount)")
                 .font(BanBanFont.caption)
-                .foregroundStyle(Color.white)
+                .foregroundStyle(Color.banbanErrorForeground)
                 .frame(minWidth: 20, minHeight: 20)
                 .background(Capsule().fill(Color.banbanError))
         } else if conversation.hasUnreadDot {

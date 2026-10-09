@@ -223,6 +223,7 @@ private struct TransportStepper: View {
                     .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
+            .accessibilityLabel("\(tool)减少一辆")
             Text("\(value)")
                 .font(BanBanFont.body)
                 .foregroundStyle(Color.banbanForeground)
@@ -237,6 +238,7 @@ private struct TransportStepper: View {
                     .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
+            .accessibilityLabel("\(tool)增加一辆")
         }
         .background(Capsule().fill(Color.banbanCard))
         .overlay(Capsule().strokeBorder(Color.banbanBorder, lineWidth: 1))

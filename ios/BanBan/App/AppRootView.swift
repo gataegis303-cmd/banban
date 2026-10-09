@@ -1,3 +1,10 @@
+//
+//  AppRootView.swift
+//  BanBan
+//
+//  根视图：按 AppState.phase 切换引导流 / 注册向导 / 主 Tab
+//
+
 import SwiftUI
 
 struct AppRootView: View {

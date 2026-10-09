@@ -39,7 +39,7 @@ struct SafetyView: View {
                 .font(BanBanFont.h2)
                 .foregroundStyle(Color.banbanCardForeground)
             HStack {
-                CircleIconButton(icon: "chevron.left") { dismiss() }
+                CircleIconButton(icon: "chevron.left", label: "返回") { dismiss() }
                 Spacer()
             }
         }
@@ -70,7 +70,7 @@ struct SafetyView: View {
                     Text("账号状态正常")
                         .font(BanBanFont.bodyLarge.weight(.semibold))
                         .foregroundStyle(Color.banbanCardForeground)
-                    Text("实名认证已通过")
+                    Text("账号安全已开启")
                         .font(BanBanFont.caption)
                         .foregroundStyle(Color.banbanMutedForeground)
                 }

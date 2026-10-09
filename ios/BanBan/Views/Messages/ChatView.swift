@@ -7,6 +7,8 @@ struct ChatView: View {
     @EnvironmentObject private var appState: AppState
     @Environment(\.dismiss) private var dismiss
     @State private var inputText = ""
+    @State private var showsComingSoon = false
+    @State private var comingSoonTitle: String?
 
     private var conversation: Conversation? {
         appState.conversations.first { $0.id == conversationID }
@@ -26,6 +28,13 @@ struct ChatView: View {
         }
         .background(Color.banbanBackground.ignoresSafeArea())
         .navigationBarHidden(true)
+        .alert("功能开发中", isPresented: $showsComingSoon) {
+            Button("好的", role: .cancel) {}
+        } message: {
+            if let title = comingSoonTitle {
+                Text("「\(title)」即将上线，敬请期待")
+            }
+        }
         .onAppear {
             appState.markConversationRead(conversationID)
         }
@@ -35,7 +44,7 @@ struct ChatView: View {
 
     private var header: some View {
         HStack(spacing: 12) {
-            CircleIconButton(icon: "chevron.left") { dismiss() }
+            CircleIconButton(icon: "chevron.left", label: "返回") { dismiss() }
 
             if let user = conversation?.user {
                 AvatarView(url: user.avatarURL, size: 40, initial: user.initial)
@@ -57,7 +66,7 @@ struct ChatView: View {
             }
             .buttonStyle(.plain)
 
-            CircleIconButton(icon: "ellipsis") {}
+            CircleIconButton(icon: "ellipsis", label: "更多") { comingSoon("更多操作") }
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 10)
@@ -87,12 +96,12 @@ struct ChatView: View {
                 .padding(.horizontal, 16)
                 .padding(.vertical, 16)
             }
-            .onAppear {
+            .task {
+                // 等一帧让消息完成布局再滚到底部，避免直接滚动被布局覆盖
+                try? await Task.sleep(nanoseconds: 100_000_000)
                 if let last = conversation?.messages.last {
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                        withAnimation {
-                            proxy.scrollTo(last.id, anchor: .bottom)
-                        }
+                    withAnimation {
+                        proxy.scrollTo(last.id, anchor: .bottom)
                     }
                 }
             }
@@ -145,6 +154,11 @@ struct ChatView: View {
         guard !text.isEmpty else { return }
         appState.send(to: conversationID, text: text)
         inputText = ""
+    }
+
+    private func comingSoon(_ title: String) {
+        comingSoonTitle = title
+        showsComingSoon = true
     }
 }
 

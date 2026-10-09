@@ -1,3 +1,10 @@
+//
+//  MockData.swift
+//  BanBan
+//
+//  演示用静态数据：推荐用户、会话与消息（无真实网络请求）
+//
+
 import Foundation
 
 enum MockData {
@@ -178,6 +185,7 @@ enum MockData {
         ]
     }
 
+    /// 演示用：筛选结果数不查库，用筛选条件的哈希派生 3~28 的稳定伪随机值，保证同一筛选结果一致
     static func filterResultCount(_ filter: FilterState) -> Int {
         guard !filter.isDefault else { return 12 }
         var hash = 17

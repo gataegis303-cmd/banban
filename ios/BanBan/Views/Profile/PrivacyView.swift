@@ -61,7 +61,7 @@ struct PrivacyView: View {
                 .font(BanBanFont.h2)
                 .foregroundStyle(Color.banbanForeground)
             HStack {
-                CircleIconButton(icon: "chevron.left") { dismiss() }
+                CircleIconButton(icon: "chevron.left", label: "返回") { dismiss() }
                 Spacer()
             }
         }

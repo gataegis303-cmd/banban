@@ -53,7 +53,7 @@ struct MyProfileView: View {
 
             Text("我的资料")
                 .font(BanBanFont.h2)
-                .foregroundStyle(Color.banbanCardForeground)
+                .foregroundStyle(Color.banbanForeground)
 
             Spacer()
 
@@ -88,10 +88,8 @@ struct MyProfileView: View {
                 HStack(spacing: 8) {
                     Text(profile.nickname)
                         .font(BanBanFont.h2)
-                        .foregroundStyle(Color.banbanCardForeground)
-                    Image(systemName: "checkmark.shield.fill")
-                        .font(.system(size: 16))
-                        .foregroundStyle(Color.banbanSuccess)
+                        .foregroundStyle(Color.banbanForeground)
+                    VerifiedBadge()
                 }
                 .padding(.top, 12)
 

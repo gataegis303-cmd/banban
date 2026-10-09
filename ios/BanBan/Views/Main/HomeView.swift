@@ -87,7 +87,7 @@ struct HomeView: View {
 
             Spacer()
 
-            CircleIconButton(icon: "slider.horizontal.3") {
+            CircleIconButton(icon: "slider.horizontal.3", label: "筛选") {
                 showsFilter = true
             }
         }
@@ -186,7 +186,7 @@ struct HomeCardView: View {
 
                 if user.verified {
                     HStack(spacing: 4) {
-                        Image(systemName: "checkmark.seal.fill")
+                        Image(systemName: "checkmark.shield.fill")
                             .font(.system(size: 12))
                         Text("已认证")
                     }
@@ -202,6 +202,7 @@ struct HomeCardView: View {
         .frame(maxWidth: .infinity)
         .contentShape(Rectangle())
         .onTapGesture(perform: onOpenDetail)
+        .accessibilityAddTraits(.isButton)
     }
 
     // MARK: 操作按钮

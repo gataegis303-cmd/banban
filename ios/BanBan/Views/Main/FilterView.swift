@@ -73,7 +73,7 @@ struct FilterView: View {
 
     private var headerBar: some View {
         HStack {
-            CircleIconButton(icon: "chevron.left") { dismiss() }
+            CircleIconButton(icon: "chevron.left", label: "返回") { dismiss() }
             Spacer()
             Text("筛选条件")
                 .font(BanBanFont.h2)
@@ -182,6 +182,20 @@ struct RangeSlider: View {
             .frame(maxHeight: .infinity)
         }
         .frame(height: 36)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("年龄范围")
+        .accessibilityValue("\(range.lowerBound) 至 \(range.upperBound) 岁")
+        .accessibilityAdjustableAction { direction in
+            // 拖动低值滑块调低年龄下限 / 高值滑块调高上限，这里按语音升降做等价调整
+            switch direction {
+            case .increment:
+                range = range.lowerBound...min(range.upperBound + 1, bounds.upperBound)
+            case .decrement:
+                range = max(range.lowerBound - 1, bounds.lowerBound)...range.upperBound
+            @unknown default:
+                break
+            }
+        }
     }
 
     private func position(for value: Int, width: CGFloat) -> CGFloat {

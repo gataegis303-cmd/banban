@@ -21,7 +21,7 @@ struct WizardStep1View: View {
             WizardStepTitle(title: "基础信息", subtitle: "先让大家认识一下你")
 
             WizardFieldGroup(title: "昵称") {
-                InputField(icon: "person", placeholder: "请输入昵称", text: $draft.nickname, maxLength: 12)
+                InputField(icon: "person", placeholder: "请输入昵称", text: $draft.nickname, maxLength: 12, textContentType: .nickname)
             }
 
             WizardFieldGroup(title: "性别") {
@@ -37,6 +37,7 @@ struct WizardStep1View: View {
                     DatePicker("", selection: $birthday, in: ...adultDate, displayedComponents: .date)
                         .labelsHidden()
                         .tint(Color.banbanPrimary)
+                        .accessibilityLabel("出生日期")
                 }
                 .padding(.horizontal, 12)
                 .frame(height: 46)
@@ -56,7 +57,7 @@ struct WizardStep1View: View {
             }
 
             WizardFieldGroup(title: "所在城市") {
-                InputField(icon: "mappin", placeholder: "请选择所在城市", text: $draft.city, maxLength: 20)
+                InputField(icon: "mappin", placeholder: "请选择所在城市", text: $draft.city, maxLength: 20, textContentType: .addressCity)
             }
 
             WizardFieldGroup(title: "职业") {

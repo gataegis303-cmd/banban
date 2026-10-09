@@ -32,7 +32,7 @@ struct ProfileDetailView: View {
 
     private var headerBar: some View {
         HStack {
-            CircleIconButton(icon: "chevron.left") { dismiss() }
+            CircleIconButton(icon: "chevron.left", label: "返回") { dismiss() }
             Spacer()
         }
         .padding(.horizontal, 12)

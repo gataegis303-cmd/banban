@@ -11,6 +11,8 @@ struct LoginView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var phone = ""
     @State private var agreed = false
+    @State private var showsComingSoon = false
+    @State private var comingSoonTitle: String?
 
     private var isValid: Bool {
         phone.count == 11 && agreed
@@ -18,7 +20,7 @@ struct LoginView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            CircleIconButton(icon: "chevron.left") { dismiss() }
+            CircleIconButton(icon: "chevron.left", label: "返回") { dismiss() }
 
             VStack(alignment: .leading, spacing: 8) {
                 Text("手机号登录")
@@ -42,6 +44,7 @@ struct LoginView: View {
                     .font(BanBanFont.bodyLarge)
                     .foregroundStyle(Color.banbanForeground)
                     .keyboardType(.numberPad)
+                    .textContentType(.telephoneNumber)
                     .onChange(of: phone) { newValue in
                         phone = String(newValue.filter(\.isNumber).prefix(11))
                     }
@@ -82,9 +85,14 @@ struct LoginView: View {
             HStack(spacing: 4) {
                 Text("遇到问题？")
                     .foregroundStyle(Color.banbanMutedForeground)
-                Text("联系客服")
-                    .foregroundStyle(Color.banbanPrimary)
-                    .fontWeight(.medium)
+                Button {
+                    comingSoon("联系客服")
+                } label: {
+                    Text("联系客服")
+                        .foregroundStyle(Color.banbanPrimary)
+                        .fontWeight(.medium)
+                }
+                .buttonStyle(.plain)
             }
             .font(BanBanFont.caption)
             .frame(maxWidth: .infinity)
@@ -94,5 +102,24 @@ struct LoginView: View {
         .padding(.horizontal, 20)
         .background(Color.banbanBackground)
         .navigationBarBackButtonHidden(true)
+        .alert("功能开发中", isPresented: $showsComingSoon) {
+            Button("好的", role: .cancel) {}
+        } message: {
+            if let title = comingSoonTitle {
+                Text("「\(title)」即将上线，敬请期待")
+            }
+        }
+        .toolbar {
+            // 数字键盘无收起键：提供「完成」按钮兜底
+            ToolbarItemGroup(placement: .keyboard) {
+                Spacer()
+                Button("完成") { hideKeyboard() }
+            }
+        }
+    }
+
+    private func comingSoon(_ title: String) {
+        comingSoonTitle = title
+        showsComingSoon = true
     }
 }

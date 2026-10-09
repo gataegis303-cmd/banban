@@ -9,6 +9,8 @@ struct SettingsView: View {
     @State private var notifyMatch = true
     @State private var notifyActivity = false
     @State private var darkMode = false
+    @State private var showsComingSoon = false
+    @State private var comingSoonTitle: String?
 
     var body: some View {
         VStack(spacing: 0) {
@@ -29,6 +31,13 @@ struct SettingsView: View {
         }
         .background(Color.banbanBackground.ignoresSafeArea())
         .navigationBarHidden(true)
+        .alert("功能开发中", isPresented: $showsComingSoon) {
+            Button("好的", role: .cancel) {}
+        } message: {
+            if let title = comingSoonTitle {
+                Text("「\(title)」即将上线，敬请期待")
+            }
+        }
         .onAppear {
             darkMode = appState.preferredColorScheme == .dark
         }
@@ -42,7 +51,7 @@ struct SettingsView: View {
                 .font(BanBanFont.h2)
                 .foregroundStyle(Color.banbanForeground)
             HStack {
-                CircleIconButton(icon: "chevron.left") { dismiss() }
+                CircleIconButton(icon: "chevron.left", label: "返回") { dismiss() }
                 Spacer()
             }
         }
@@ -60,18 +69,18 @@ struct SettingsView: View {
                     SettingRow(
                         title: "修改手机号",
                         value: "138****1234"
-                    ) {}
+                    ) { comingSoon("修改手机号") }
                     SettingRow(
                         title: "修改密码",
                         showsChevron: true
-                    ) {}
+                    ) { comingSoon("修改密码") }
                     NavigationLink {
                         VerifyIDView(mode: .settings)
                     } label: {
                         SettingRow(
                             title: "实名认证状态",
                             value: "未认证"
-                        ) {}
+                        )
                     }
                     .buttonStyle(.plain)
                 }
@@ -108,7 +117,7 @@ struct SettingsView: View {
                     SettingRow(
                         title: "清除缓存",
                         value: "12.5 MB"
-                    ) {}
+                    ) { comingSoon("清除缓存") }
                 }
             }
         }
@@ -121,12 +130,12 @@ struct SettingsView: View {
             SectionLabel(text: "关于")
             SectionCard {
                 VStack(spacing: 0) {
-                    SettingRow(title: "关于伴伴") {}
-                    SettingRow(title: "用户协议") {}
+                    SettingRow(title: "关于伴伴") { comingSoon("关于伴伴") }
+                    SettingRow(title: "用户协议") { comingSoon("用户协议") }
                     NavigationLink {
                         PrivacyView()
                     } label: {
-                        SettingRow(title: "隐私政策") {}
+                        SettingRow(title: "隐私政策")
                     }
                     .buttonStyle(.plain)
                 }
@@ -152,5 +161,10 @@ struct SettingsView: View {
         }
         .buttonStyle(.plain)
         .padding(.top, 8)
+    }
+
+    private func comingSoon(_ title: String) {
+        comingSoonTitle = title
+        showsComingSoon = true
     }
 }

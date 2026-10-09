@@ -1,3 +1,10 @@
+//
+//  Models.swift
+//  BanBan
+//
+//  核心数据模型：用户资料（MyProfile / UserProfile）、会话、筛选条件与编辑草稿（ProfileDraft）
+//
+
 import Foundation
 
 struct ProfileDraft: Equatable {
@@ -140,8 +147,10 @@ struct MyProfile: Equatable {
         if let b = draft.birthday {
             birthday = b
             let years = Calendar.current.dateComponents([.year], from: b, to: Date()).year ?? age
+            // 18 = 成年下限，防止 mock 数据被编辑出未成年年龄
             age = max(18, years)
         }
+        // 6 = 资料照片上限（与产品规格一致）
         if draft.photoCount > 0 { photoCount = min(draft.photoCount, 6) }
         // 集合 / 开关 / 明细类：整体覆盖（编辑模式由 ProfileDraft(from:) 全量回填，清空即有意为之）
         pets = draft.pets
@@ -160,7 +169,7 @@ struct MyProfile: Equatable {
 }
 
 extension ProfileDraft {
-    /// 编辑模式回填：MyProfile → draft 的唯一映射（新增资料字段只需改这一处）
+    /// 编辑模式回填：MyProfile → draft 的唯一映射（新增资料字段需同步 init(from:) 与 MyProfile.merge(_:) 两处）
     init(from profile: MyProfile) {
         self.init()
         nickname = profile.nickname

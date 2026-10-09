@@ -10,6 +10,7 @@
 //
 
 import SwiftUI
+import UIKit
 
 // MARK: - 流式布局（iOS 16 Layout 协议）
 
@@ -134,7 +135,7 @@ struct MultiChipRow: View {
 
 // MARK: - 分段单选（向导 / 筛选）
 
-/// 分段单选组：容器 input 底 p-1 圆角 8 + 边框，选中项 primary 底
+/// 分段单选组：容器 input 底、内边距 4、圆角 8、带边框，选中项 primary 底
 /// 选项 ≤3 个时平铺一行，>3 个时每行 3 列
 struct SegmentGroup<T: OptionEnum & Equatable>: View {
     let options: [T]
@@ -248,6 +249,8 @@ struct SecondaryButton: View {
 /// 圆形图标按钮（顶栏返回 / 筛选 / 铃铛等）
 struct CircleIconButton: View {
     let icon: String
+    /// 无障碍朗读文案
+    let label: String
     var action: () -> Void = {}
 
     var body: some View {
@@ -259,6 +262,7 @@ struct CircleIconButton: View {
                 .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
+        .accessibilityLabel(label)
     }
 }
 
@@ -291,31 +295,12 @@ struct AvatarView: View {
     }
 }
 
-/// 实名认证徽章：checkmark.shield，可带「已认证」文字
+/// 实名认证徽章：checkmark.shield 图标（success 色）
 struct VerifiedBadge: View {
-    var showText: Bool = false
-
     var body: some View {
-        Group {
-            if showText {
-                HStack(spacing: 3) {
-                    Image(systemName: "checkmark.shield.fill")
-                        .font(.system(size: 11, weight: .semibold))
-                    Text("已认证")
-                        .font(BanBanFont.caption)
-                        .fontWeight(.medium)
-                }
-                .foregroundStyle(Color.banbanSuccess)
-                .padding(.horizontal, 8)
-                .padding(.vertical, 4)
-                .background(Color.banbanSuccessSubtle)
-                .clipShape(Capsule())
-            } else {
-                Image(systemName: "checkmark.shield.fill")
-                    .font(.system(size: 18, weight: .semibold))
-                    .foregroundStyle(Color.banbanSuccess)
-            }
-        }
+        Image(systemName: "checkmark.shield.fill")
+            .font(.system(size: 18, weight: .semibold))
+            .foregroundStyle(Color.banbanSuccess)
     }
 }
 
@@ -383,7 +368,7 @@ struct EmptyStateView: View {
 
 // MARK: - 输入框
 
-/// 左图标输入框（r8 边框）
+/// 左图标输入框（圆角 8、带边框）
 struct InputField: View {
     var icon: String? = nil
     var placeholder: String
@@ -391,6 +376,8 @@ struct InputField: View {
     var keyboardType: UIKeyboardType = .default
     /// 最大输入长度（nil 不限），超出即时截断
     var maxLength: Int? = nil
+    /// 系统输入语义（如 .nickname / .addressCity），nil 不设置
+    var textContentType: UITextContentType? = nil
 
     var body: some View {
         HStack(spacing: 10) {
@@ -404,6 +391,8 @@ struct InputField: View {
                 .font(BanBanFont.bodyLarge)
                 .foregroundStyle(Color.banbanForeground)
                 .keyboardType(keyboardType)
+                .textContentType(textContentType)
+                .autocorrectionDisabled()
                 .onChange(of: text) { newValue in
                     if let maxLength, newValue.count > maxLength {
                         text = String(newValue.prefix(maxLength))
@@ -423,7 +412,7 @@ struct InputField: View {
 
 // MARK: - 卡片 / 分组
 
-/// 内容卡片：card 底 r12 p16 + shadow-1
+/// 内容卡片：card 底、圆角 12、内边距 16、阴影 1
 struct SectionCard<Content: View>: View {
     @ViewBuilder let content: Content
 
@@ -499,6 +488,7 @@ struct InfoRow: View {
 }
 
 /// 设置行：图标 + 标题/副标题 + 右侧值 + 箭头
+/// action 为 nil 时渲染静态行（供 NavigationLink label 使用，避免内层 Button 吞掉点击）
 struct SettingRow: View {
     var icon: String? = nil
     var iconColor: Color = .banbanPrimary
@@ -507,47 +497,53 @@ struct SettingRow: View {
     var value: String? = nil
     var valueColor: Color = .banbanMutedForeground
     var showsChevron: Bool = true
-    var action: () -> Void = {}
+    var action: (() -> Void)? = nil
 
-    var body: some View {
-        Button(action: action) {
-            HStack(spacing: 12) {
-                if let icon {
-                    RoundedRectangle(cornerRadius: BanBanRadius.small)
-                        .fill(iconColor.opacity(0.12))
-                        .frame(width: 32, height: 32)
-                        .overlay(
-                            Image(systemName: icon)
-                                .font(.system(size: 14, weight: .medium))
-                                .foregroundStyle(iconColor)
-                        )
-                }
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(title)
-                        .font(BanBanFont.body)
-                        .foregroundStyle(Color.banbanForeground)
-                    if let subtitle {
-                        Text(subtitle)
-                            .font(BanBanFont.caption)
-                            .foregroundStyle(Color.banbanMutedForeground)
-                    }
-                }
-                Spacer()
-                if let value {
-                    Text(value)
-                        .font(BanBanFont.body)
-                        .foregroundStyle(valueColor)
-                }
-                if showsChevron {
-                    Image(systemName: "chevron.right")
-                        .font(.system(size: 13, weight: .semibold))
+    private var row: some View {
+        HStack(spacing: 12) {
+            if let icon {
+                RoundedRectangle(cornerRadius: BanBanRadius.small)
+                    .fill(iconColor.opacity(0.12))
+                    .frame(width: 32, height: 32)
+                    .overlay(
+                        Image(systemName: icon)
+                            .font(.system(size: 14, weight: .medium))
+                            .foregroundStyle(iconColor)
+                    )
+            }
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title)
+                    .font(BanBanFont.body)
+                    .foregroundStyle(Color.banbanForeground)
+                if let subtitle {
+                    Text(subtitle)
+                        .font(BanBanFont.caption)
                         .foregroundStyle(Color.banbanMutedForeground)
                 }
             }
-            .padding(.vertical, 12)
-            .contentShape(Rectangle())
+            Spacer()
+            if let value {
+                Text(value)
+                    .font(BanBanFont.body)
+                    .foregroundStyle(valueColor)
+            }
+            if showsChevron {
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundStyle(Color.banbanMutedForeground)
+            }
         }
-        .buttonStyle(.plain)
+        .padding(.vertical, 12)
+        .contentShape(Rectangle())
+    }
+
+    var body: some View {
+        if let action {
+            Button(action: action) { row }
+                .buttonStyle(.plain)
+        } else {
+            row
+        }
     }
 }
 
@@ -573,6 +569,7 @@ struct ToggleRow: View {
             Toggle("", isOn: $isOn)
                 .labelsHidden()
                 .tint(Color.banbanPrimary)
+                .accessibilityLabel(title)
         }
         .padding(.vertical, 10)
     }
@@ -602,6 +599,7 @@ struct StepperRow: View {
                     .background(Circle().fill(Color.banbanInput.opacity(0.5)))
             }
             .buttonStyle(.plain)
+            .accessibilityLabel("\(label)减少一")
             Text("\(value)")
                 .font(BanBanFont.bodyLarge.weight(.semibold))
                 .foregroundStyle(Color.banbanForeground)
@@ -616,6 +614,7 @@ struct StepperRow: View {
                     .background(Circle().fill(Color.banbanPrimary.opacity(0.15)))
             }
             .buttonStyle(.plain)
+            .accessibilityLabel("\(label)增加一")
         }
         .padding(.vertical, 6)
     }
@@ -682,6 +681,7 @@ struct TagEntryField: View {
                                     .foregroundStyle(Color.banbanMutedForeground)
                             }
                             .buttonStyle(.plain)
+                            .accessibilityLabel("删除标签 \(tag)")
                         }
                         .padding(.horizontal, 10)
                         .padding(.vertical, 6)
@@ -717,6 +717,7 @@ struct WizardProgressHeader: View {
                             .background(Circle().fill(Color.banbanInput.opacity(0.4)))
                     }
                     .buttonStyle(.plain)
+                    .accessibilityLabel("关闭")
                 }
                 Text("步骤 \(step)/\(total)")
                     .font(BanBanFont.label)
@@ -745,17 +746,28 @@ struct WizardProgressHeader: View {
 
 // MARK: - 表单字段行
 
-/// 向导字段容器：小标题 + 内容
+/// 字段容器：小标题 + 内容（spacing / 标题色可调；向导页用更紧间距 + foreground 标题）
 struct FieldGroup<Content: View>: View {
     let title: String
+    var spacing: CGFloat = 8
+    var titleColor: Color = .banbanMutedForeground
     @ViewBuilder let content: Content
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: spacing) {
             Text(title)
                 .font(BanBanFont.label)
-                .foregroundStyle(Color.banbanMutedForeground)
+                .foregroundStyle(titleColor)
             content
         }
+    }
+}
+
+// MARK: - 键盘
+
+extension View {
+    /// 收起当前键盘（数字键盘无返回键时的兜底收起途径）
+    func hideKeyboard() {
+        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
     }
 }

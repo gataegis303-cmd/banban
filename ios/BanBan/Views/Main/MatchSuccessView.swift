@@ -25,12 +25,14 @@ struct MatchSuccessView: View {
 
                     Image(systemName: "sparkles")
                         .font(.system(size: 20))
-                        .foregroundStyle(BanBanColor.warning)
+                        .foregroundStyle(Color.banbanWarning)
                         .offset(x: -86, y: -66)
+                        .accessibilityHidden(true)
                     Image(systemName: "sparkles")
                         .font(.system(size: 14))
                         .foregroundStyle(Color.banbanPrimary.opacity(0.6))
                         .offset(x: 92, y: -40)
+                        .accessibilityHidden(true)
 
                     heartBadge
                 }

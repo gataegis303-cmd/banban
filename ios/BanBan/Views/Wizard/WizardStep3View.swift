@@ -44,6 +44,7 @@ struct WizardStep3View: View {
                             .contentShape(Rectangle())
                     }
                     .buttonStyle(.plain)
+                    .accessibilityLabel("搭伴对象说明")
                 }
             }
 
@@ -79,7 +80,7 @@ struct WizardStep3View: View {
             }
 
             WizardFieldGroup(title: "意向城市") {
-                InputField(icon: "mappin", placeholder: "请输入意向城市", text: $draft.intendedCity, maxLength: 20)
+                InputField(icon: "mappin", placeholder: "请输入意向城市", text: $draft.intendedCity, maxLength: 20, textContentType: .addressCity)
             }
         }
         .sheet(isPresented: $showsSeekingInfo) {

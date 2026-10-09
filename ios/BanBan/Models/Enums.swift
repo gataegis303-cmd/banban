@@ -1,3 +1,10 @@
+//
+//  Enums.swift
+//  BanBan
+//
+//  资料与筛选的枚举选项（统一实现 OptionEnum，供 SegmentGroup / EnumChipRow 泛型渲染）
+//
+
 import Foundation
 
 protocol OptionEnum: Identifiable, CaseIterable, RawRepresentable where RawValue == String {}
