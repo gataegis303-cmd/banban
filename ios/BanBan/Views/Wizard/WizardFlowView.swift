@@ -83,6 +83,8 @@ struct WizardFlowView: View {
     let mode: WizardMode
 
     @State private var step = 1
+    @State private var showsValidationAlert = false
+    @State private var validationMessage = ""
 
     var body: some View {
         VStack(spacing: 0) {
@@ -111,6 +113,11 @@ struct WizardFlowView: View {
         }
         .background(Color.banbanBackground.ignoresSafeArea())
         .navigationBarHidden(true)
+        .alert("信息不完整", isPresented: $showsValidationAlert) {
+            Button("好的", role: .cancel) {}
+        } message: {
+            Text(validationMessage)
+        }
     }
 
     // MARK: 底栏（步骤点 + 上一步 / 下一步 / 完成）
@@ -155,6 +162,11 @@ struct WizardFlowView: View {
     }
 
     private func finish() {
+        if mode == .registration, let message = registrationValidationMessage {
+            validationMessage = message
+            showsValidationAlert = true
+            return
+        }
         switch mode {
         case .registration:
             appState.completeRegistration()
@@ -162,5 +174,15 @@ struct WizardFlowView: View {
             appState.saveProfileEdits()
             dismiss()
         }
+    }
+
+    /// 注册必填项校验：昵称 / 性别 / 所在城市
+    private var registrationValidationMessage: String? {
+        var missing: [String] = []
+        if appState.draft.nickname.trimmingCharacters(in: .whitespaces).isEmpty { missing.append("昵称") }
+        if appState.draft.gender == nil { missing.append("性别") }
+        if appState.draft.city.trimmingCharacters(in: .whitespaces).isEmpty { missing.append("所在城市") }
+        guard !missing.isEmpty else { return nil }
+        return "请填写：" + missing.joined(separator: "、")
     }
 }

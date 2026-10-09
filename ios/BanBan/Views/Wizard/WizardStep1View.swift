@@ -41,6 +41,10 @@ struct WizardStep1View: View {
                     RoundedRectangle(cornerRadius: BanBanRadius.medium)
                         .strokeBorder(Color.banbanBorder, lineWidth: 1)
                 )
+                .onAppear {
+                    // 初始值回写 draft：UI 显示与 draft 恒一致（含编辑模式回填）
+                    if draft.birthday == nil { draft.birthday = birthday }
+                }
                 .onChange(of: birthday) { newValue in
                     draft.birthday = newValue
                 }

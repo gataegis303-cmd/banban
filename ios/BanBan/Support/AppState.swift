@@ -61,29 +61,9 @@ final class AppState: ObservableObject {
         phase = .registration
     }
 
+    /// 进入编辑模式：以当前资料全量回填 draft（唯一映射见 ProfileDraft.init(from:)）
     func startEditProfile() {
-        draft = ProfileDraft()
-        applyDraftFields(from: myProfile)
-    }
-
-    private func applyDraftFields(from profile: MyProfile) {
-        draft.nickname = profile.nickname
-        draft.gender = profile.gender
-        draft.city = profile.city
-        draft.occupation = profile.occupation
-        draft.marriage = profile.marriage
-        draft.sleep = profile.sleep
-        draft.direction = profile.direction
-        draft.partnerStatus = profile.partnerStatus
-        draft.seeking = profile.seeking
-        draft.noAccept = profile.noAccept
-        draft.intendedCity = profile.intendedCity
-        draft.parentRelation = profile.parentRelation
-        draft.financeTrial = profile.financeTrial
-        draft.financeFormal = profile.financeFormal
-        if profile.petDisplay == "养猫" { draft.pets = ["猫"] }
-        else if profile.petDisplay == "养狗" { draft.pets = ["狗"] }
-        draft.photoCount = profile.photoCount
+        draft = ProfileDraft(from: myProfile)
     }
 
     func completeRegistration() {

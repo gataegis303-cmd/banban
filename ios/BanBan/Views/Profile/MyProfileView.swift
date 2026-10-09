@@ -58,6 +58,7 @@ struct MyProfileView: View {
             Spacer()
 
             Button {
+                appState.startEditProfile()
                 showsEdit = true
             } label: {
                 Image(systemName: "pencil")
