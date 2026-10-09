@@ -11,12 +11,17 @@ struct WizardStep1View: View {
         _birthday = State(initialValue: draft.wrappedValue.birthday ?? fallback)
     }
 
+    /// 成年日期上限：18 岁前的今天
+    private var adultDate: Date {
+        Calendar.current.date(byAdding: .year, value: -18, to: Date()) ?? Date()
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
             WizardStepTitle(title: "基础信息", subtitle: "先让大家认识一下你")
 
             WizardFieldGroup(title: "昵称") {
-                InputField(icon: "person", placeholder: "请输入昵称", text: $draft.nickname)
+                InputField(icon: "person", placeholder: "请输入昵称", text: $draft.nickname, maxLength: 12)
             }
 
             WizardFieldGroup(title: "性别") {
@@ -29,7 +34,7 @@ struct WizardStep1View: View {
                         .font(.system(size: 15))
                         .foregroundStyle(Color.banbanMutedForeground)
                         .frame(width: 20)
-                    DatePicker("", selection: $birthday, in: ...Date(), displayedComponents: .date)
+                    DatePicker("", selection: $birthday, in: ...adultDate, displayedComponents: .date)
                         .labelsHidden()
                         .tint(Color.banbanPrimary)
                 }
@@ -51,11 +56,11 @@ struct WizardStep1View: View {
             }
 
             WizardFieldGroup(title: "所在城市") {
-                InputField(icon: "mappin", placeholder: "请选择所在城市", text: $draft.city)
+                InputField(icon: "mappin", placeholder: "请选择所在城市", text: $draft.city, maxLength: 20)
             }
 
             WizardFieldGroup(title: "职业") {
-                InputField(icon: "briefcase", placeholder: "请输入职业", text: $draft.occupation)
+                InputField(icon: "briefcase", placeholder: "请输入职业", text: $draft.occupation, maxLength: 20)
             }
 
             WizardFieldGroup(title: "婚姻状态") {

@@ -79,9 +79,11 @@ final class AppState: ObservableObject {
         cardIndex = min(cardIndex + 1, recommendations.count)
     }
 
+    /// 喜欢：记录 + 推进卡片 + 弹出匹配成功（推进内聚在此，与 skipCurrent 对称）
     func likeCurrent() {
         guard let user = currentCard else { return }
         likedUserIDs.insert(user.id)
+        advanceCard()
         matchUser = user
     }
 

@@ -49,11 +49,9 @@ struct HomeView: View {
                 user: user,
                 onMessage: {
                     appState.startChatAfterMatch()
-                    appState.advanceCard()
                 },
                 onContinue: {
                     appState.dismissMatch()
-                    appState.advanceCard()
                 }
             )
         }

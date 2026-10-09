@@ -389,6 +389,8 @@ struct InputField: View {
     var placeholder: String
     @Binding var text: String
     var keyboardType: UIKeyboardType = .default
+    /// 最大输入长度（nil 不限），超出即时截断
+    var maxLength: Int? = nil
 
     var body: some View {
         HStack(spacing: 10) {
@@ -402,6 +404,11 @@ struct InputField: View {
                 .font(BanBanFont.bodyLarge)
                 .foregroundStyle(Color.banbanForeground)
                 .keyboardType(keyboardType)
+                .onChange(of: text) { newValue in
+                    if let maxLength, newValue.count > maxLength {
+                        text = String(newValue.prefix(maxLength))
+                    }
+                }
         }
         .padding(.horizontal, 12)
         .frame(height: 46)
@@ -637,6 +644,12 @@ struct TagEntryField: View {
                     .font(BanBanFont.body)
                     .foregroundStyle(Color.banbanForeground)
                     .submitLabel(.done)
+                    .onChange(of: input) { newValue in
+                        // 输入时即时截断，避免 addTag 因超长静默失败
+                        if newValue.count > ProfileDraft.otherTagLimit {
+                            input = String(newValue.prefix(ProfileDraft.otherTagLimit))
+                        }
+                    }
                     .onSubmit(addTag)
                 Button(action: addTag) {
                     Text("添加")
