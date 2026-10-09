@@ -92,18 +92,10 @@ struct ChatView: View {
             .task {
                 // 等一帧让消息完成布局再滚到底部，避免直接滚动被布局覆盖
                 try? await Task.sleep(nanoseconds: 100_000_000)
-                if let last = conversation?.messages.last {
-                    withAnimation {
-                        proxy.scrollTo(last.id, anchor: .bottom)
-                    }
-                }
+                scrollToLast(proxy)
             }
             .onChange(of: conversation?.messages.count) { _ in
-                if let last = conversation?.messages.last {
-                    withAnimation {
-                        proxy.scrollTo(last.id, anchor: .bottom)
-                    }
-                }
+                scrollToLast(proxy)
             }
         }
     }
@@ -147,6 +139,14 @@ struct ChatView: View {
         guard !text.isEmpty else { return }
         appState.send(to: conversationID, text: text)
         inputText = ""
+    }
+
+    private func scrollToLast(_ proxy: ScrollViewProxy) {
+        if let last = conversation?.messages.last {
+            withAnimation {
+                proxy.scrollTo(last.id, anchor: .bottom)
+            }
+        }
     }
 
 }

@@ -378,6 +378,8 @@ struct InputField: View {
     var maxLength: Int? = nil
     /// 系统输入语义（如 .nickname / .addressCity），nil 不设置
     var textContentType: UITextContentType? = nil
+    /// 是否开启自动纠错（默认关闭，短文本如昵称/城市不需要）
+    var autocorrect: Bool = false
 
     var body: some View {
         HStack(spacing: 10) {
@@ -392,7 +394,7 @@ struct InputField: View {
                 .foregroundStyle(Color.banbanForeground)
                 .keyboardType(keyboardType)
                 .textContentType(textContentType)
-                .autocorrectionDisabled()
+                .autocorrectionDisabled(!autocorrect)
                 .onChange(of: text) { newValue in
                     if let maxLength, newValue.count > maxLength {
                         text = String(newValue.prefix(maxLength))
