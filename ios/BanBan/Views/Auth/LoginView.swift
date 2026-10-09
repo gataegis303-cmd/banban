@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct LoginView: View {
+    @Environment(\.dismiss) private var dismiss
     @State private var phone = ""
     @State private var agreed = false
 
@@ -17,7 +18,7 @@ struct LoginView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            CircleIconButton(icon: "chevron.left")
+            CircleIconButton(icon: "chevron.left") { dismiss() }
 
             VStack(alignment: .leading, spacing: 8) {
                 Text("手机号登录")

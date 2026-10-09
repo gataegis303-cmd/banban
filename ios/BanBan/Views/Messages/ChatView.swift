@@ -49,7 +49,7 @@ struct ChatView: View {
             Spacer()
 
             NavigationLink {
-                SafetyView(onBack: { dismiss() })
+                SafetyView()
             } label: {
                 Text("举报")
                     .font(BanBanFont.caption)

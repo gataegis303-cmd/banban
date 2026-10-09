@@ -2,7 +2,9 @@ import SwiftUI
 
 /// 安全中心：账号状态 + 举报记录 / 黑名单 / 紧急联系人 / 帮助与反馈
 struct SafetyView: View {
-    let onBack: () -> Void
+    @Environment(\.dismiss) private var dismiss
+    @State private var showsComingSoon = false
+    @State private var comingSoonTitle: String?
 
     var body: some View {
         VStack(spacing: 0) {
@@ -20,6 +22,13 @@ struct SafetyView: View {
         }
         .background(Color.banbanBackground.ignoresSafeArea())
         .navigationBarHidden(true)
+        .alert("功能开发中", isPresented: $showsComingSoon) {
+            Button("好的", role: .cancel) {}
+        } message: {
+            if let title = comingSoonTitle {
+                Text("「\(title)」即将上线，敬请期待")
+            }
+        }
     }
 
     // MARK: - 头部
@@ -30,7 +39,7 @@ struct SafetyView: View {
                 .font(BanBanFont.h2)
                 .foregroundStyle(Color.banbanCardForeground)
             HStack {
-                CircleIconButton(icon: "chevron.left") { onBack() }
+                CircleIconButton(icon: "chevron.left") { dismiss() }
                 Spacer()
             }
         }
@@ -75,15 +84,18 @@ struct SafetyView: View {
     private var actionList: some View {
         SectionCard {
             VStack(spacing: 0) {
-                actionRow(icon: "flag", title: "举报记录", subtitle: "查看我提交的举报") {}
-                actionRow(icon: "ban", title: "黑名单", subtitle: "管理已屏蔽的用户") {}
-                NavigationLink {
-                    SettingsView()
-                } label: {
-                    actionRow(icon: "phone.fill", title: "紧急联系人", subtitle: "设置应急联络方式") {}
+                actionRow(icon: "flag", title: "举报记录", subtitle: "查看我提交的举报") {
+                    comingSoon("举报记录")
                 }
-                .buttonStyle(.plain)
-                actionRow(icon: "questionmark.circle", title: "帮助与反馈", subtitle: "获取安全相关帮助", showsBorder: false) {}
+                actionRow(icon: "ban", title: "黑名单", subtitle: "管理已屏蔽的用户") {
+                    comingSoon("黑名单")
+                }
+                actionRow(icon: "phone.fill", title: "紧急联系人", subtitle: "设置应急联络方式") {
+                    comingSoon("紧急联系人")
+                }
+                actionRow(icon: "questionmark.circle", title: "帮助与反馈", subtitle: "获取安全相关帮助", showsBorder: false) {
+                    comingSoon("帮助与反馈")
+                }
             }
         }
     }
@@ -103,5 +115,10 @@ struct SafetyView: View {
                     .frame(height: 0.5)
             }
         }
+    }
+
+    private func comingSoon(_ title: String) {
+        comingSoonTitle = title
+        showsComingSoon = true
     }
 }

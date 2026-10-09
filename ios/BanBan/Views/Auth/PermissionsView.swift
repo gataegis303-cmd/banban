@@ -9,13 +9,14 @@ import SwiftUI
 
 struct PermissionsView: View {
     @EnvironmentObject var appState: AppState
+    @Environment(\.dismiss) private var dismiss
     @State private var location = true
     @State private var notification = true
     @State private var photos = true
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            CircleIconButton(icon: "chevron.left")
+            CircleIconButton(icon: "chevron.left") { dismiss() }
 
             VStack(alignment: .leading, spacing: 8) {
                 Text("开启以下权限，体验更完整")
