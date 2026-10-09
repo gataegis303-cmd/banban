@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#000000">
+    <title>权限请求</title>
+    <style id="theme-vars">
+/* BanBan Design Tokens — 不婚者异性搭伴生活中介平台 */
+
+:root {
+  /* Brand primary — Apple System Blue */
+  --banban-primary-50: #e8f2ff;
+  --banban-primary-100: #cfe5ff;
+  --banban-primary-200: #9fcbff;
+  --banban-primary-300: #66abff;
+  --banban-primary-400: #2e8dff;
+  --banban-primary-500: #007aff;
+  --banban-primary-600: #0064d6;
+  --banban-primary-700: #004fad;
+  --banban-primary-800: #003b82;
+  --banban-primary-900: #00275a;
+  --banban-primary-950: #001c40;
+
+  /* Neutral scale — iOS system grays */
+  --banban-neutral-0: #ffffff;
+  --banban-neutral-50: #f7f7fa;
+  --banban-neutral-100: #f2f2f7;
+  --banban-neutral-200: #e5e5ea;
+  --banban-neutral-300: #d1d1d6;
+  --banban-neutral-400: #aeaeb2;
+  --banban-neutral-500: #8e8e93;
+  --banban-neutral-600: #6e6e73;
+  --banban-neutral-700: #48484a;
+  --banban-neutral-800: #2c2c2e;
+  --banban-neutral-900: #1d1d1f;
+  --banban-neutral-950: #0a0a0c;
+
+  /* Semantic states — Apple system colors */
+  --banban-success: #34c759;
+  --banban-success-foreground: #ffffff;
+  --banban-success-subtle: #e9f9ee;
+  --banban-warning: #ff9500;
+  --banban-warning-foreground: #1d1d1f;
+  --banban-warning-subtle: #fff2e0;
+  --banban-error: #ff3b30;
+  --banban-error-foreground: #ffffff;
+  --banban-error-subtle: #ffecea;
+  --banban-info: #007aff;
+  --banban-info-foreground: #ffffff;
+  --banban-info-subtle: #e8f2ff;
+
+  /* Semantic aliases — light mode */
+  --banban-background: var(--banban-neutral-0);
+  --banban-foreground: var(--banban-neutral-900);
+  --banban-card: var(--banban-neutral-0);
+  --banban-card-foreground: var(--banban-neutral-900);
+  --banban-popover: var(--banban-neutral-0);
+  --banban-popover-foreground: var(--banban-neutral-900);
+  --banban-primary: var(--banban-primary-500);
+  --banban-primary-foreground: var(--banban-neutral-0);
+  --banban-muted: var(--banban-neutral-100);
+  --banban-muted-foreground: var(--banban-neutral-500);
+  --banban-border: var(--banban-neutral-200);
+  --banban-input: var(--banban-neutral-300);
+  --banban-ring: var(--banban-primary-500);
+
+  /* Radius scale */
+  --banban-radius-small: 4px;
+  --banban-radius-medium: 8px;
+  --banban-radius-large: 12px;
+  --banban-radius-full: 9999px;
+
+  /* Shadows — Apple hairline elevations (light); floating layers may be deeper */
+  --banban-shadow-1: 0 1px 2px rgba(0, 0, 0, 0.04), 0 1px 1px rgba(0, 0, 0, 0.03);
+  --banban-shadow-2: 0 8px 24px -8px rgba(0, 0, 0, 0.08), 0 4px 8px -4px rgba(0, 0, 0, 0.05);
+  --banban-shadow-3: 0 24px 64px -12px rgba(0, 0, 0, 0.12);
+
+  /* Typography */
+  --banban-font-sans: -apple-system, BlinkMacSystemFont, "SF Pro", "PingFang SC", "Noto Sans SC", "Microsoft YaHei", system-ui, sans-serif;
+  --banban-font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
+  /* iOS safe areas */
+  --banban-safe-top: env(safe-area-inset-top, 0px);
+  --banban-safe-bottom: env(safe-area-inset-bottom, 0px);
+  --banban-safe-left: env(safe-area-inset-left, 0px);
+  --banban-safe-right: env(safe-area-inset-right, 0px);
+}
+
+/* Dark mode — Apple system dark (default appearance) */
+.dark {
+  --banban-background: #000000;
+  --banban-foreground: #f5f5f7;
+  --banban-card: #1c1c1e;
+  --banban-card-foreground: #f5f5f7;
+  --banban-popover: #3a3a3c;
+  --banban-popover-foreground: #f5f5f7;
+  --banban-primary: var(--banban-primary-400);
+  --banban-primary-foreground: #000000;
+  --banban-muted: #1c1c1e;
+  --banban-muted-foreground: #8e8e93;
+  --banban-border: #3a3a3c;
+  --banban-input: #3a3a3c;
+  --banban-ring: var(--banban-primary-400);
+
+  /* Status subtle backgrounds — dark-tuned tints (Apple system hues) */
+  --banban-success-subtle: #142e1f;
+  --banban-warning-subtle: #33230e;
+  --banban-error-subtle: #331513;
+  --banban-info-subtle: #0f2338;
+
+  /* Elevated shadows for dark surfaces — Apple dark elevations */
+  --banban-shadow-1: 0 1px 2px rgba(0, 0, 0, 0.30);
+  --banban-shadow-2: 0 8px 24px -8px rgba(0, 0, 0, 0.50), 0 4px 8px -4px rgba(0, 0, 0, 0.40);
+  --banban-shadow-3: 0 24px 64px -12px rgba(0, 0, 0, 0.60);
+}
+
+/* Base typography classes */
+.banban-text-display {
+  font-family: var(--banban-font-sans);
+  font-size: clamp(32px, 8vw, 48px);
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+.banban-text-h1 {
+  font-family: var(--banban-font-sans);
+  font-size: clamp(24px, 6vw, 32px);
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.015em;
+}
+
+.banban-text-h2 {
+  font-family: var(--banban-font-sans);
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.banban-text-body {
+  font-family: var(--banban-font-sans);
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1.6;
+}
+
+.banban-text-body-large {
+  font-family: var(--banban-font-sans);
+  font-size: 17px;
+  font-weight: 400;
+  line-height: 1.55;
+}
+
+.banban-text-caption {
+  font-family: var(--banban-font-sans);
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.5;
+}
+
+.banban-text-label {
+  font-family: var(--banban-font-sans);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.4;
+}
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.3.1/dist/index.global.js"></script>
+    <script src="https://unpkg.com/lucide@1.8.0/dist/umd/lucide.min.js"></script>
+    <style type="text/tailwindcss">
+  @theme inline {
+    --color-background: var(--banban-background);
+    --color-foreground: var(--banban-foreground);
+    --color-card: var(--banban-card);
+    --color-card-foreground: var(--banban-card-foreground);
+    --color-popover: var(--banban-popover);
+    --color-popover-foreground: var(--banban-popover-foreground);
+    --color-primary: var(--banban-primary);
+    --color-primary-foreground: var(--banban-primary-foreground);
+    --color-muted: var(--banban-muted);
+    --color-muted-foreground: var(--banban-muted-foreground);
+    --color-border: var(--banban-border);
+    --color-input: var(--banban-input);
+    --color-ring: var(--banban-ring);
+    --radius-sm: var(--banban-radius-small);
+    --radius-md: var(--banban-radius-medium);
+    --radius-lg: var(--banban-radius-large);
+  }
+  @layer base {
+    body { background: var(--banban-background); color: var(--banban-foreground); }
+    td, th { @apply break-words; word-break: break-all; word-break: auto-phrase; }
+    th { @apply whitespace-nowrap; }
+  }
+    </style>
+    <style id="semantic-token-fallback">
+      .bg-background { background-color: var(--banban-background); }
+      .text-background { color: var(--banban-background); }
+      .border-background { border-color: var(--banban-background); }
+      .ring-background { --tw-ring-color: var(--banban-background); }
+      .bg-foreground { background-color: var(--banban-foreground); }
+      .text-foreground { color: var(--banban-foreground); }
+      .border-foreground { border-color: var(--banban-foreground); }
+      .ring-foreground { --tw-ring-color: var(--banban-foreground); }
+      .bg-card { background-color: var(--banban-card); }
+      .text-card { color: var(--banban-card); }
+      .border-card { border-color: var(--banban-card); }
+      .ring-card { --tw-ring-color: var(--banban-card); }
+      .bg-card-foreground { background-color: var(--banban-card-foreground); }
+      .text-card-foreground { color: var(--banban-card-foreground); }
+      .border-card-foreground { border-color: var(--banban-card-foreground); }
+      .ring-card-foreground { --tw-ring-color: var(--banban-card-foreground); }
+      .bg-popover { background-color: var(--banban-popover); }
+      .text-popover { color: var(--banban-popover); }
+      .border-popover { border-color: var(--banban-popover); }
+      .ring-popover { --tw-ring-color: var(--banban-popover); }
+      .bg-popover-foreground { background-color: var(--banban-popover-foreground); }
+      .text-popover-foreground { color: var(--banban-popover-foreground); }
+      .border-popover-foreground { border-color: var(--banban-popover-foreground); }
+      .ring-popover-foreground { --tw-ring-color: var(--banban-popover-foreground); }
+      .bg-primary { background-color: var(--banban-primary); }
+      .text-primary { color: var(--banban-primary); }
+      .border-primary { border-color: var(--banban-primary); }
+      .ring-primary { --tw-ring-color: var(--banban-primary); }
+      .bg-primary-foreground { background-color: var(--banban-primary-foreground); }
+      .text-primary-foreground { color: var(--banban-primary-foreground); }
+      .border-primary-foreground { border-color: var(--banban-primary-foreground); }
+      .ring-primary-foreground { --tw-ring-color: var(--banban-primary-foreground); }
+      .bg-muted { background-color: var(--banban-muted); }
+      .text-muted { color: var(--banban-muted); }
+      .border-muted { border-color: var(--banban-muted); }
+      .ring-muted { --tw-ring-color: var(--banban-muted); }
+      .bg-muted-foreground { background-color: var(--banban-muted-foreground); }
+      .text-muted-foreground { color: var(--banban-muted-foreground); }
+      .border-muted-foreground { border-color: var(--banban-muted-foreground); }
+      .ring-muted-foreground { --tw-ring-color: var(--banban-muted-foreground); }
+      .bg-border { background-color: var(--banban-border); }
+      .text-border { color: var(--banban-border); }
+      .border-border { border-color: var(--banban-border); }
+      .ring-border { --tw-ring-color: var(--banban-border); }
+      .bg-input { background-color: var(--banban-input); }
+      .text-input { color: var(--banban-input); }
+      .border-input { border-color: var(--banban-input); }
+      .ring-input { --tw-ring-color: var(--banban-input); }
+      .bg-ring { background-color: var(--banban-ring); }
+      .text-ring { color: var(--banban-ring); }
+      .border-ring { border-color: var(--banban-ring); }
+      .ring-ring { --tw-ring-color: var(--banban-ring); }
+    </style>
+    <style>
+      .no-scrollbar::-webkit-scrollbar { display: none; }
+      .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+      [data-icon] {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        -webkit-mask-size: contain;
+        mask-size: contain;
+        -webkit-mask-repeat: no-repeat;
+        mask-repeat: no-repeat;
+        -webkit-mask-position: center;
+        mask-position: center;
+        background-color: currentColor;
+      }
+    </style>
+</head>
+<body class="min-h-screen font-sans antialiased" data-page-node-id="page-permissions">
+    <main class="min-h-screen flex flex-col px-5" style="padding-top: calc(var(--banban-safe-top) + 48px); padding-bottom: calc(var(--banban-safe-bottom) + 24px);">
+        <section class="mb-8">
+            <h1 class="banban-text-h1 text-foreground">开启以下权限，体验更完整</h1>
+        </section>
+
+        <section class="flex flex-col gap-4 flex-1">
+            <article class="flex items-center justify-between gap-4 bg-card border border-border rounded-[var(--banban-radius-large)] p-4" style="box-shadow: var(--banban-shadow-1);">
+                <div class="flex items-center gap-4 min-w-0">
+                    <div class="flex-shrink-0 flex items-center justify-center w-11 h-11 rounded-full bg-primary/10 text-primary">
+                        <i data-lucide="map-pin" class="w-5 h-5"></i>
+                    </div>
+                    <div class="min-w-0">
+                        <p class="text-[17px] font-semibold text-card-foreground truncate">位置权限</p>
+                        <p class="text-sm text-muted-foreground truncate">推荐同城搭伴对象</p>
+                    </div>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer flex-shrink-0" data-dom-id="toggle-location">
+                    <input type="checkbox" class="sr-only peer" checked>
+                    <div class="w-12 h-7 bg-muted rounded-full transition-colors peer-checked:bg-primary" style="transition: background-color 0.2s ease;"></div>
+                    <div class="absolute left-1 top-1 w-5 h-5 bg-card rounded-full shadow-sm transition-transform" style="transform: translateX(0); transition: transform 0.2s ease;" data-knob></div>
+                </label>
+            </article>
+
+            <article class="flex items-center justify-between gap-4 bg-card border border-border rounded-[var(--banban-radius-large)] p-4" style="box-shadow: var(--banban-shadow-1);">
+                <div class="flex items-center gap-4 min-w-0">
+                    <div class="flex-shrink-0 flex items-center justify-center w-11 h-11 rounded-full bg-primary/10 text-primary">
+                        <i data-lucide="bell" class="w-5 h-5"></i>
+                    </div>
+                    <div class="min-w-0">
+                        <p class="text-[17px] font-semibold text-card-foreground truncate">通知权限</p>
+                        <p class="text-sm text-muted-foreground truncate">不错过匹配与消息</p>
+                    </div>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer flex-shrink-0" data-dom-id="toggle-notification">
+                    <input type="checkbox" class="sr-only peer" checked>
+                    <div class="w-12 h-7 bg-muted rounded-full transition-colors peer-checked:bg-primary"></div>
+                    <div class="absolute left-1 top-1 w-5 h-5 bg-card rounded-full shadow-sm transition-transform" style="transform: translateX(0); transition: transform 0.2s ease;" data-knob></div>
+                </label>
+            </article>
+
+            <article class="flex items-center justify-between gap-4 bg-card border border-border rounded-[var(--banban-radius-large)] p-4" style="box-shadow: var(--banban-shadow-1);">
+                <div class="flex items-center gap-4 min-w-0">
+                    <div class="flex-shrink-0 flex items-center justify-center w-11 h-11 rounded-full bg-primary/10 text-primary">
+                        <i data-lucide="image" class="w-5 h-5"></i>
+                    </div>
+                    <div class="min-w-0">
+                        <p class="text-[17px] font-semibold text-card-foreground truncate">相册权限</p>
+                        <p class="text-sm text-muted-foreground truncate">上传真实生活照片</p>
+                    </div>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer flex-shrink-0" data-dom-id="toggle-photos">
+                    <input type="checkbox" class="sr-only peer" checked>
+                    <div class="w-12 h-7 bg-muted rounded-full transition-colors peer-checked:bg-primary"></div>
+                    <div class="absolute left-1 top-1 w-5 h-5 bg-card rounded-full shadow-sm transition-transform" style="transform: translateX(0); transition: transform 0.2s ease;" data-knob></div>
+                </label>
+            </article>
+        </section>
+
+        <section class="mt-auto pt-6 flex flex-col gap-3">
+            <button type="button" data-dom-id="btn-enter" class="w-full py-3.5 px-6 rounded-[var(--banban-radius-medium)] bg-primary text-primary-foreground text-[17px] font-semibold active:scale-[0.98] transition-transform">
+                进入伴伴
+            </button>
+            <button type="button" data-dom-id="btn-skip" class="w-full py-3 px-6 text-[15px] font-medium text-muted-foreground active:opacity-70 transition-opacity">
+                稍后在设置中开启
+            </button>
+        </section>
+    </main>
+
+    <script>
+        lucide.createIcons();
+
+        document.querySelectorAll('label[data-dom-id^="toggle-"]').forEach(function (label) {
+            var input = label.querySelector('input[type="checkbox"]');
+            var knob = label.querySelector('[data-knob]');
+            function update() {
+                knob.style.transform = input.checked ? 'translateX(20px)' : 'translateX(0)';
+            }
+            input.addEventListener('change', update);
+            update();
+        });
+    </script>
+</body>
+</html>

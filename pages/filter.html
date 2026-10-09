@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#000000">
+    <title>筛选面板</title>
+    <style id="theme-vars">
+/* BanBan Design Tokens — 不婚者异性搭伴生活中介平台 */
+
+:root {
+  /* Brand primary — Apple System Blue */
+  --banban-primary-50: #e8f2ff;
+  --banban-primary-100: #cfe5ff;
+  --banban-primary-200: #9fcbff;
+  --banban-primary-300: #66abff;
+  --banban-primary-400: #2e8dff;
+  --banban-primary-500: #007aff;
+  --banban-primary-600: #0064d6;
+  --banban-primary-700: #004fad;
+  --banban-primary-800: #003b82;
+  --banban-primary-900: #00275a;
+  --banban-primary-950: #001c40;
+
+  /* Neutral scale — iOS system grays */
+  --banban-neutral-0: #ffffff;
+  --banban-neutral-50: #f7f7fa;
+  --banban-neutral-100: #f2f2f7;
+  --banban-neutral-200: #e5e5ea;
+  --banban-neutral-300: #d1d1d6;
+  --banban-neutral-400: #aeaeb2;
+  --banban-neutral-500: #8e8e93;
+  --banban-neutral-600: #6e6e73;
+  --banban-neutral-700: #48484a;
+  --banban-neutral-800: #2c2c2e;
+  --banban-neutral-900: #1d1d1f;
+  --banban-neutral-950: #0a0a0c;
+
+  /* Semantic states — Apple system colors */
+  --banban-success: #34c759;
+  --banban-success-foreground: #ffffff;
+  --banban-success-subtle: #e9f9ee;
+  --banban-warning: #ff9500;
+  --banban-warning-foreground: #1d1d1f;
+  --banban-warning-subtle: #fff2e0;
+  --banban-error: #ff3b30;
+  --banban-error-foreground: #ffffff;
+  --banban-error-subtle: #ffecea;
+  --banban-info: #007aff;
+  --banban-info-foreground: #ffffff;
+  --banban-info-subtle: #e8f2ff;
+
+  /* Semantic aliases — light mode */
+  --banban-background: var(--banban-neutral-0);
+  --banban-foreground: var(--banban-neutral-900);
+  --banban-card: var(--banban-neutral-0);
+  --banban-card-foreground: var(--banban-neutral-900);
+  --banban-popover: var(--banban-neutral-0);
+  --banban-popover-foreground: var(--banban-neutral-900);
+  --banban-primary: var(--banban-primary-500);
+  --banban-primary-foreground: var(--banban-neutral-0);
+  --banban-muted: var(--banban-neutral-100);
+  --banban-muted-foreground: var(--banban-neutral-500);
+  --banban-border: var(--banban-neutral-200);
+  --banban-input: var(--banban-neutral-300);
+  --banban-ring: var(--banban-primary-500);
+
+  /* Radius scale */
+  --banban-radius-small: 4px;
+  --banban-radius-medium: 8px;
+  --banban-radius-large: 12px;
+  --banban-radius-full: 9999px;
+
+  /* Shadows — Apple hairline elevations (light); floating layers may be deeper */
+  --banban-shadow-1: 0 1px 2px rgba(0, 0, 0, 0.04), 0 1px 1px rgba(0, 0, 0, 0.03);
+  --banban-shadow-2: 0 8px 24px -8px rgba(0, 0, 0, 0.08), 0 4px 8px -4px rgba(0, 0, 0, 0.05);
+  --banban-shadow-3: 0 24px 64px -12px rgba(0, 0, 0, 0.12);
+
+  /* Typography */
+  --banban-font-sans: -apple-system, BlinkMacSystemFont, "SF Pro", "PingFang SC", "Noto Sans SC", "Microsoft YaHei", system-ui, sans-serif;
+  --banban-font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
+  /* iOS safe areas */
+  --banban-safe-top: env(safe-area-inset-top, 0px);
+  --banban-safe-bottom: env(safe-area-inset-bottom, 0px);
+  --banban-safe-left: env(safe-area-inset-left, 0px);
+  --banban-safe-right: env(safe-area-inset-right, 0px);
+}
+
+/* Dark mode — Apple system dark (default appearance) */
+.dark {
+  --banban-background: #000000;
+  --banban-foreground: #f5f5f7;
+  --banban-card: #1c1c1e;
+  --banban-card-foreground: #f5f5f7;
+  --banban-popover: #3a3a3c;
+  --banban-popover-foreground: #f5f5f7;
+  --banban-primary: var(--banban-primary-400);
+  --banban-primary-foreground: #000000;
+  --banban-muted: #1c1c1e;
+  --banban-muted-foreground: #8e8e93;
+  --banban-border: #3a3a3c;
+  --banban-input: #3a3a3c;
+  --banban-ring: var(--banban-primary-400);
+
+  /* Status subtle backgrounds — dark-tuned tints (Apple system hues) */
+  --banban-success-subtle: #142e1f;
+  --banban-warning-subtle: #33230e;
+  --banban-error-subtle: #331513;
+  --banban-info-subtle: #0f2338;
+
+  /* Elevated shadows for dark surfaces — Apple dark elevations */
+  --banban-shadow-1: 0 1px 2px rgba(0, 0, 0, 0.30);
+  --banban-shadow-2: 0 8px 24px -8px rgba(0, 0, 0, 0.50), 0 4px 8px -4px rgba(0, 0, 0, 0.40);
+  --banban-shadow-3: 0 24px 64px -12px rgba(0, 0, 0, 0.60);
+}
+
+/* Base typography classes */
+.banban-text-display {
+  font-family: var(--banban-font-sans);
+  font-size: clamp(32px, 8vw, 48px);
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+.banban-text-h1 {
+  font-family: var(--banban-font-sans);
+  font-size: clamp(24px, 6vw, 32px);
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.015em;
+}
+
+.banban-text-h2 {
+  font-family: var(--banban-font-sans);
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.banban-text-body {
+  font-family: var(--banban-font-sans);
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1.6;
+}
+
+.banban-text-body-large {
+  font-family: var(--banban-font-sans);
+  font-size: 17px;
+  font-weight: 400;
+  line-height: 1.55;
+}
+
+.banban-text-caption {
+  font-family: var(--banban-font-sans);
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.5;
+}
+
+.banban-text-label {
+  font-family: var(--banban-font-sans);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.4;
+}
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.3.1/dist/index.global.js"></script>
+    <script src="https://unpkg.com/lucide@1.8.0/dist/umd/lucide.min.js"></script>
+    <style type="text/tailwindcss">
+  @theme inline {
+    --color-background: var(--banban-background);
+    --color-foreground: var(--banban-foreground);
+    --color-card: var(--banban-card);
+    --color-card-foreground: var(--banban-card-foreground);
+    --color-popover: var(--banban-popover);
+    --color-popover-foreground: var(--banban-popover-foreground);
+    --color-primary: var(--banban-primary);
+    --color-primary-foreground: var(--banban-primary-foreground);
+    --color-muted: var(--banban-muted);
+    --color-muted-foreground: var(--banban-muted-foreground);
+    --color-border: var(--banban-border);
+    --color-input: var(--banban-input);
+    --color-ring: var(--banban-ring);
+    --radius-sm: var(--banban-radius-small);
+    --radius-md: var(--banban-radius-medium);
+    --radius-lg: var(--banban-radius-large);
+  }
+  @layer base {
+    body { background: var(--banban-background); color: var(--banban-foreground); }
+    td, th { @apply break-words; word-break: break-all; word-break: auto-phrase; }
+    th { @apply whitespace-nowrap; }
+  }
+    </style>
+    <style id="semantic-token-fallback">
+      .bg-background { background-color: var(--banban-background); }
+      .text-background { color: var(--banban-background); }
+      .border-background { border-color: var(--banban-background); }
+      .ring-background { --tw-ring-color: var(--banban-background); }
+      .bg-foreground { background-color: var(--banban-foreground); }
+      .text-foreground { color: var(--banban-foreground); }
+      .border-foreground { border-color: var(--banban-foreground); }
+      .ring-foreground { --tw-ring-color: var(--banban-foreground); }
+      .bg-card { background-color: var(--banban-card); }
+      .text-card { color: var(--banban-card); }
+      .border-card { border-color: var(--banban-card); }
+      .ring-card { --tw-ring-color: var(--banban-card); }
+      .bg-card-foreground { background-color: var(--banban-card-foreground); }
+      .text-card-foreground { color: var(--banban-card-foreground); }
+      .border-card-foreground { border-color: var(--banban-card-foreground); }
+      .ring-card-foreground { --tw-ring-color: var(--banban-card-foreground); }
+      .bg-popover { background-color: var(--banban-popover); }
+      .text-popover { color: var(--banban-popover); }
+      .border-popover { border-color: var(--banban-popover); }
+      .ring-popover { --tw-ring-color: var(--banban-popover); }
+      .bg-popover-foreground { background-color: var(--banban-popover-foreground); }
+      .text-popover-foreground { color: var(--banban-popover-foreground); }
+      .border-popover-foreground { border-color: var(--banban-popover-foreground); }
+      .ring-popover-foreground { --tw-ring-color: var(--banban-popover-foreground); }
+      .bg-primary { background-color: var(--banban-primary); }
+      .text-primary { color: var(--banban-primary); }
+      .border-primary { border-color: var(--banban-primary); }
+      .ring-primary { --tw-ring-color: var(--banban-primary); }
+      .bg-primary-foreground { background-color: var(--banban-primary-foreground); }
+      .text-primary-foreground { color: var(--banban-primary-foreground); }
+      .border-primary-foreground { border-color: var(--banban-primary-foreground); }
+      .ring-primary-foreground { --tw-ring-color: var(--banban-primary-foreground); }
+      .bg-muted { background-color: var(--banban-muted); }
+      .text-muted { color: var(--banban-muted); }
+      .border-muted { border-color: var(--banban-muted); }
+      .ring-muted { --tw-ring-color: var(--banban-muted); }
+      .bg-muted-foreground { background-color: var(--banban-muted-foreground); }
+      .text-muted-foreground { color: var(--banban-muted-foreground); }
+      .border-muted-foreground { border-color: var(--banban-muted-foreground); }
+      .ring-muted-foreground { --tw-ring-color: var(--banban-muted-foreground); }
+      .bg-border { background-color: var(--banban-border); }
+      .text-border { color: var(--banban-border); }
+      .border-border { border-color: var(--banban-border); }
+      .ring-border { --tw-ring-color: var(--banban-border); }
+      .bg-input { background-color: var(--banban-input); }
+      .text-input { color: var(--banban-input); }
+      .border-input { border-color: var(--banban-input); }
+      .ring-input { --tw-ring-color: var(--banban-input); }
+      .bg-ring { background-color: var(--banban-ring); }
+      .text-ring { color: var(--banban-ring); }
+      .border-ring { border-color: var(--banban-ring); }
+      .ring-ring { --tw-ring-color: var(--banban-ring); }
+    </style>
+    <style>
+      .no-scrollbar::-webkit-scrollbar { display: none; }
+      .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+      [data-icon] {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        -webkit-mask-size: contain;
+        mask-size: contain;
+        -webkit-mask-repeat: no-repeat;
+        mask-repeat: no-repeat;
+        -webkit-mask-position: center;
+        mask-position: center;
+        background-color: currentColor;
+      }
+      /* Tag checkbox helpers */
+      .tag-checkbox:checked + .tag-label {
+        background-color: var(--banban-primary);
+        color: var(--banban-primary-foreground);
+        border-color: var(--banban-primary);
+      }
+      .tag-checkbox:focus-visible + .tag-label {
+        outline: 2px solid var(--banban-ring);
+        outline-offset: 2px;
+      }
+      /* Range slider styling via vars */
+      input[type="range"] {
+        -webkit-appearance: none;
+        appearance: none;
+        background: transparent;
+        cursor: pointer;
+      }
+      input[type="range"]::-webkit-slider-runnable-track {
+        height: 4px;
+        border-radius: var(--banban-radius-full);
+        background: var(--banban-border);
+      }
+      input[type="range"]::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        margin-top: -7px;
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background: var(--banban-primary);
+        border: 3px solid var(--banban-neutral-0);
+        box-shadow: var(--banban-shadow-1);
+      }
+    </style>
+</head>
+<body class="min-h-screen font-sans antialiased bg-background text-foreground">
+    <header class="sticky top-0 z-10 bg-background/95 backdrop-blur-sm border-b border-border">
+        <div class="flex items-center justify-between px-4 h-14">
+            <button type="button" data-dom-id="btn-back" class="flex items-center justify-center w-10 h-10 -ml-2 rounded-full active:bg-muted transition-colors" aria-label="返回">
+                <i data-lucide="chevron-left" class="w-6 h-6 text-foreground"></i>
+            </button>
+            <h1 class="text-lg font-semibold text-foreground">筛选条件</h1>
+            <button type="button" data-dom-id="btn-reset" class="text-sm font-medium text-muted-foreground active:text-foreground transition-colors px-2 py-1" aria-label="重置">
+                重置
+            </button>
+        </div>
+    </header>
+
+    <main class="px-4 pt-4 pb-32">
+        <!-- 城市选择 -->
+        <section class="mb-6">
+            <label class="block text-sm font-medium text-foreground mb-2">城市</label>
+            <button type="button" data-dom-id="input-city" class="w-full flex items-center justify-between px-4 py-3 bg-card border border-border rounded-lg active:border-primary transition-colors" aria-label="选择城市">
+                <span class="text-body text-foreground">全部城市</span>
+                <i data-lucide="chevron-right" class="w-5 h-5 text-muted-foreground"></i>
+            </button>
+        </section>
+
+        <!-- 年龄范围 -->
+        <section class="mb-6">
+            <div class="flex items-center justify-between mb-3">
+                <label class="text-sm font-medium text-foreground">年龄范围</label>
+                <span class="text-sm text-primary font-medium">20 - 40 岁</span>
+            </div>
+            <div class="flex items-center gap-3">
+                <input type="number" data-dom-id="range-age-min" value="20" min="18" max="80" class="w-20 px-3 py-2 bg-card border border-border rounded-lg text-center text-foreground focus:outline-none focus:border-primary" aria-label="最小年龄">
+                <span class="text-muted-foreground">-</span>
+                <input type="number" data-dom-id="range-age-max" value="40" min="18" max="80" class="w-20 px-3 py-2 bg-card border border-border rounded-lg text-center text-foreground focus:outline-none focus:border-primary" aria-label="最大年龄">
+            </div>
+            <div class="mt-4">
+                <input type="range" data-dom-id="range-age-slider" min="18" max="80" value="40" class="w-full" aria-label="年龄滑块">
+            </div>
+        </section>
+
+        <!-- 搭伴方向 -->
+        <section class="mb-6">
+            <label class="block text-sm font-medium text-foreground mb-3">搭伴方向</label>
+            <div class="flex flex-wrap gap-2">
+                <label class="cursor-pointer">
+                    <input type="checkbox" data-dom-id="filter-direction-marriage" class="tag-checkbox sr-only">
+                    <span class="tag-label inline-flex items-center px-4 py-2 bg-card border border-border rounded-full text-sm text-foreground transition-colors select-none">领证结婚</span>
+                </label>
+                <label class="cursor-pointer">
+                    <input type="checkbox" data-dom-id="filter-direction-agreement" class="tag-checkbox sr-only">
+                    <span class="tag-label inline-flex items-center px-4 py-2 bg-card border border-border rounded-full text-sm text-foreground transition-colors select-none">协议搭伴</span>
+                </label>
+                <label class="cursor-pointer">
+                    <input type="checkbox" data-dom-id="filter-direction-freestyle" class="tag-checkbox sr-only">
+                    <span class="tag-label inline-flex items-center px-4 py-2 bg-card border border-border rounded-full text-sm text-foreground transition-colors select-none">自由式</span>
+                </label>
+            </div>
+        </section>
+
+        <!-- 可接受伴侣状态 -->
+        <section class="mb-6">
+            <label class="block text-sm font-medium text-foreground mb-3">可接受伴侣状态</label>
+            <div class="flex flex-wrap gap-2">
+                <label class="cursor-pointer">
+                    <input type="checkbox" data-dom-id="filter-status-unmarried" class="tag-checkbox sr-only">
+                    <span class="tag-label inline-flex items-center px-4 py-2 bg-card border border-border rounded-full text-sm text-foreground transition-colors select-none">未婚无伴侣</span>
+                </label>
+                <label class="cursor-pointer">
+                    <input type="checkbox" data-dom-id="filter-status-same-sex-partner" class="tag-checkbox sr-only">
+                    <span class="tag-label inline-flex items-center px-4 py-2 bg-card border border-border rounded-full text-sm text-foreground transition-colors select-none">有同性伴侣</span>
+                </label>
+                <label class="cursor-pointer">
+                    <input type="checkbox" data-dom-id="filter-status-divorced" class="tag-checkbox sr-only">
+                    <span class="tag-label inline-flex items-center px-4 py-2 bg-card border border-border rounded-full text-sm text-foreground transition-colors select-none">离异</span>
+                </label>
+            </div>
+        </section>
+
+        <!-- 搭伴对象 -->
+        <section class="mb-6">
+            <label class="block text-sm font-medium text-foreground mb-3">搭伴对象</label>
+            <div class="flex flex-wrap gap-2">
+                <label class="cursor-pointer">
+                    <input type="checkbox" data-dom-id="filter-seek-opposite" class="tag-checkbox sr-only">
+                    <span class="tag-label inline-flex items-center px-4 py-2 bg-card border border-border rounded-full text-sm text-foreground transition-colors select-none">异性</span>
+                </label>
+                <label class="cursor-pointer">
+                    <input type="checkbox" data-dom-id="filter-seek-same" class="tag-checkbox sr-only">
+                    <span class="tag-label inline-flex items-center px-4 py-2 bg-card border border-border rounded-full text-sm text-foreground transition-colors select-none">同性</span>
+                </label>
+                <label class="cursor-pointer">
+                    <input type="checkbox" data-dom-id="filter-seek-any" class="tag-checkbox sr-only">
+                    <span class="tag-label inline-flex items-center px-4 py-2 bg-card border border-border rounded-full text-sm text-foreground transition-colors select-none">不限</span>
+                </label>
+            </div>
+        </section>
+
+        <!-- 居住模式 -->
+        <section class="mb-6">
+            <label class="block text-sm font-medium text-foreground mb-3">居住模式</label>
+            <div class="flex flex-wrap gap-2">
+                <label class="cursor-pointer">
+                    <input type="checkbox" data-dom-id="filter-live-together" class="tag-checkbox sr-only">
+                    <span class="tag-label inline-flex items-center px-4 py-2 bg-card border border-border rounded-full text-sm text-foreground transition-colors select-none">同居同房</span>
+                </label>
+                <label class="cursor-pointer">
+                    <input type="checkbox" data-dom-id="filter-live-separate" class="tag-checkbox sr-only">
+                    <span class="tag-label inline-flex items-center px-4 py-2 bg-card border border-border rounded-full text-sm text-foreground transition-colors select-none">同居分房</span>
+                </label>
+                <label class="cursor-pointer">
+                    <input type="checkbox" data-dom-id="filter-live-flexible" class="tag-checkbox sr-only">
+                    <span class="tag-label inline-flex items-center px-4 py-2 bg-card border border-border rounded-full text-sm text-foreground transition-colors select-none">同城分居</span>
+                </label>
+            </div>
+        </section>
+
+        <!-- 与父母关系 -->
+        <section class="mb-6">
+            <label class="block text-sm font-medium text-foreground mb-3">与父母关系</label>
+            <div class="flex flex-wrap gap-2">
+                <label class="cursor-pointer">
+                    <input type="checkbox" data-dom-id="filter-parent-together" class="tag-checkbox sr-only">
+                    <span class="tag-label inline-flex items-center px-4 py-2 bg-card border border-border rounded-full text-sm text-foreground transition-colors select-none">与其同住</span>
+                </label>
+                <label class="cursor-pointer">
+                    <input type="checkbox" data-dom-id="filter-parent-nearby" class="tag-checkbox sr-only">
+                    <span class="tag-label inline-flex items-center px-4 py-2 bg-card border border-border rounded-full text-sm text-foreground transition-colors select-none">同城居住</span>
+                </label>
+                <label class="cursor-pointer">
+                    <input type="checkbox" data-dom-id="filter-parent-remote" class="tag-checkbox sr-only">
+                    <span class="tag-label inline-flex items-center px-4 py-2 bg-card border border-border rounded-full text-sm text-foreground transition-colors select-none">脱离关系</span>
+                </label>
+                <label class="cursor-pointer">
+                    <input type="checkbox" data-dom-id="filter-parent-other" class="tag-checkbox sr-only">
+                    <span class="tag-label inline-flex items-center px-4 py-2 bg-card border border-border rounded-full text-sm text-foreground transition-colors select-none">父母双亡</span>
+                </label>
+            </div>
+        </section>
+
+        <!-- 试用期财务管理 -->
+        <section class="mb-6">
+            <label class="block text-sm font-medium text-foreground mb-3">试用期财务管理</label>
+            <div class="flex flex-wrap gap-2">
+                <label class="cursor-pointer">
+                    <input type="checkbox" data-dom-id="filter-finance-aa" class="tag-checkbox sr-only">
+                    <span class="tag-label inline-flex items-center px-4 py-2 bg-card border border-border rounded-full text-sm text-foreground transition-colors select-none">AA</span>
+                </label>
+                <label class="cursor-pointer">
+                    <input type="checkbox" data-dom-id="filter-finance-ratio" class="tag-checkbox sr-only">
+                    <span class="tag-label inline-flex items-center px-4 py-2 bg-card border border-border rounded-full text-sm text-foreground transition-colors select-none">按收入比例</span>
+                </label>
+                <label class="cursor-pointer">
+                    <input type="checkbox" data-dom-id="filter-finance-discuss" class="tag-checkbox sr-only">
+                    <span class="tag-label inline-flex items-center px-4 py-2 bg-card border border-border rounded-full text-sm text-foreground transition-colors select-none">一事一议</span>
+                </label>
+            </div>
+        </section>
+
+        <!-- 正式关系后财务管理 -->
+        <section class="mb-6">
+            <label class="block text-sm font-medium text-foreground mb-3">正式关系后财务管理</label>
+            <div class="flex flex-wrap gap-2">
+                <label class="cursor-pointer">
+                    <input type="checkbox" data-dom-id="filter-wealth-aa" class="tag-checkbox sr-only">
+                    <span class="tag-label inline-flex items-center px-4 py-2 bg-card border border-border rounded-full text-sm text-foreground transition-colors select-none">AA</span>
+                </label>
+                <label class="cursor-pointer">
+                    <input type="checkbox" data-dom-id="filter-wealth-ratio" class="tag-checkbox sr-only">
+                    <span class="tag-label inline-flex items-center px-4 py-2 bg-card border border-border rounded-full text-sm text-foreground transition-colors select-none">按收入比例</span>
+                </label>
+                <label class="cursor-pointer">
+                    <input type="checkbox" data-dom-id="filter-wealth-discuss" class="tag-checkbox sr-only">
+                    <span class="tag-label inline-flex items-center px-4 py-2 bg-card border border-border rounded-full text-sm text-foreground transition-colors select-none">一事一议</span>
+                </label>
+                <label class="cursor-pointer">
+                    <input type="checkbox" data-dom-id="filter-wealth-joint" class="tag-checkbox sr-only">
+                    <span class="tag-label inline-flex items-center px-4 py-2 bg-card border border-border rounded-full text-sm text-foreground transition-colors select-none">共同财富</span>
+                </label>
+            </div>
+        </section>
+
+        <!-- 生育意愿 -->
+        <section class="mb-6">
+            <label class="block text-sm font-medium text-foreground mb-3">生育意愿</label>
+            <div class="flex flex-wrap gap-2">
+                <label class="cursor-pointer">
+                    <input type="checkbox" data-dom-id="filter-child-yes" class="tag-checkbox sr-only">
+                    <span class="tag-label inline-flex items-center px-4 py-2 bg-card border border-border rounded-full text-sm text-foreground transition-colors select-none">是</span>
+                </label>
+                <label class="cursor-pointer">
+                    <input type="checkbox" data-dom-id="filter-child-no" class="tag-checkbox sr-only">
+                    <span class="tag-label inline-flex items-center px-4 py-2 bg-card border border-border rounded-full text-sm text-foreground transition-colors select-none">否</span>
+                </label>
+                <label class="cursor-pointer">
+                    <input type="checkbox" data-dom-id="filter-child-adopt" class="tag-checkbox sr-only">
+                    <span class="tag-label inline-flex items-center px-4 py-2 bg-card border border-border rounded-full text-sm text-foreground transition-colors select-none">领养</span>
+                </label>
+                <label class="cursor-pointer">
+                    <input type="checkbox" data-dom-id="filter-child-uncertain" class="tag-checkbox sr-only">
+                    <span class="tag-label inline-flex items-center px-4 py-2 bg-card border border-border rounded-full text-sm text-foreground transition-colors select-none">不确定</span>
+                </label>
+            </div>
+        </section>
+
+        <!-- 宠物 -->
+        <section class="mb-6">
+            <label class="block text-sm font-medium text-foreground mb-3">宠物</label>
+            <div class="flex flex-wrap gap-2">
+                <label class="cursor-pointer">
+                    <input type="checkbox" data-dom-id="filter-pet-cat" class="tag-checkbox sr-only">
+                    <span class="tag-label inline-flex items-center px-4 py-2 bg-card border border-border rounded-full text-sm text-foreground transition-colors select-none">猫</span>
+                </label>
+                <label class="cursor-pointer">
+                    <input type="checkbox" data-dom-id="filter-pet-dog" class="tag-checkbox sr-only">
+                    <span class="tag-label inline-flex items-center px-4 py-2 bg-card border border-border rounded-full text-sm text-foreground transition-colors select-none">狗</span>
+                </label>
+                <label class="cursor-pointer">
+                    <input type="checkbox" data-dom-id="filter-pet-none" class="tag-checkbox sr-only">
+                    <span class="tag-label inline-flex items-center px-4 py-2 bg-card border border-border rounded-full text-sm text-foreground transition-colors select-none">无</span>
+                </label>
+                <label class="cursor-pointer">
+                    <input type="checkbox" data-dom-id="filter-pet-other" class="tag-checkbox sr-only">
+                    <span class="tag-label inline-flex items-center px-4 py-2 bg-card border border-border rounded-full text-sm text-foreground transition-colors select-none">其他</span>
+                </label>
+            </div>
+        </section>
+
+        <!-- 不能接受 -->
+        <section class="mb-6">
+            <label class="block text-sm font-medium text-foreground">不能接受</label>
+            <p class="banban-text-caption text-muted-foreground mt-0.5 mb-3">不能接受（排除）：匹配时排除含这些特质的用户</p>
+            <div class="flex flex-wrap gap-2">
+                <label class="cursor-pointer">
+                    <input type="checkbox" data-dom-id="filter-no-mama" class="tag-checkbox sr-only">
+                    <span class="tag-label inline-flex items-center px-4 py-2 bg-card border border-border rounded-full text-sm text-foreground transition-colors select-none">妈宝</span>
+                </label>
+                <label class="cursor-pointer">
+                    <input type="checkbox" data-dom-id="filter-no-sloppy" class="tag-checkbox sr-only">
+                    <span class="tag-label inline-flex items-center px-4 py-2 bg-card border border-border rounded-full text-sm text-foreground transition-colors select-none">邋遢</span>
+                </label>
+                <label class="cursor-pointer">
+                    <input type="checkbox" data-dom-id="filter-no-fickle" class="tag-checkbox sr-only">
+                    <span class="tag-label inline-flex items-center px-4 py-2 bg-card border border-border rounded-full text-sm text-foreground transition-colors select-none">花心</span>
+                </label>
+                <label class="cursor-pointer">
+                    <input type="checkbox" data-dom-id="filter-no-cold" class="tag-checkbox sr-only">
+                    <span class="tag-label inline-flex items-center px-4 py-2 bg-card border border-border rounded-full text-sm text-foreground transition-colors select-none">冷暴力</span>
+                </label>
+                <label class="cursor-pointer">
+                    <input type="checkbox" data-dom-id="filter-no-lie" class="tag-checkbox sr-only">
+                    <span class="tag-label inline-flex items-center px-4 py-2 bg-card border border-border rounded-full text-sm text-foreground transition-colors select-none">撒谎成性</span>
+                </label>
+                <label class="cursor-pointer">
+                    <input type="checkbox" data-dom-id="filter-no-control" class="tag-checkbox sr-only">
+                    <span class="tag-label inline-flex items-center px-4 py-2 bg-card border border-border rounded-full text-sm text-foreground transition-colors select-none">控制欲强</span>
+                </label>
+                <label class="cursor-pointer">
+                    <input type="checkbox" data-dom-id="filter-no-addiction" class="tag-checkbox sr-only">
+                    <span class="tag-label inline-flex items-center px-4 py-2 bg-card border border-border rounded-full text-sm text-foreground transition-colors select-none">嗜酒嗜赌</span>
+                </label>
+                <label class="cursor-pointer">
+                    <input type="checkbox" data-dom-id="filter-no-livingoff" class="tag-checkbox sr-only">
+                    <span class="tag-label inline-flex items-center px-4 py-2 bg-card border border-border rounded-full text-sm text-foreground transition-colors select-none">啃老</span>
+                </label>
+                <label class="cursor-pointer">
+                    <input type="checkbox" data-dom-id="filter-no-petty" class="tag-checkbox sr-only">
+                    <span class="tag-label inline-flex items-center px-4 py-2 bg-card border border-border rounded-full text-sm text-foreground transition-colors select-none">斤斤计较</span>
+                </label>
+                <label class="cursor-pointer">
+                    <input type="checkbox" data-dom-id="filter-no-pet" class="tag-checkbox sr-only">
+                    <span class="tag-label inline-flex items-center px-4 py-2 bg-card border border-border rounded-full text-sm text-foreground transition-colors select-none">养宠</span>
+                </label>
+                <label class="cursor-pointer">
+                    <input type="checkbox" data-dom-id="filter-no-smoke" class="tag-checkbox sr-only">
+                    <span class="tag-label inline-flex items-center px-4 py-2 bg-card border border-border rounded-full text-sm text-foreground transition-colors select-none">吸烟</span>
+                </label>
+                <label class="cursor-pointer">
+                    <input type="checkbox" data-dom-id="filter-no-drink" class="tag-checkbox sr-only">
+                    <span class="tag-label inline-flex items-center px-4 py-2 bg-card border border-border rounded-full text-sm text-foreground transition-colors select-none">饮酒</span>
+                </label>
+                <label class="cursor-pointer">
+                    <input type="checkbox" data-dom-id="filter-no-liveparent" class="tag-checkbox sr-only">
+                    <span class="tag-label inline-flex items-center px-4 py-2 bg-card border border-border rounded-full text-sm text-foreground transition-colors select-none">与父母同住</span>
+                </label>
+                <label class="cursor-pointer">
+                    <input type="checkbox" data-dom-id="filter-no-distance" class="tag-checkbox sr-only">
+                    <span class="tag-label inline-flex items-center px-4 py-2 bg-card border border-border rounded-full text-sm text-foreground transition-colors select-none">异地恋</span>
+                </label>
+                <label class="cursor-pointer">
+                    <input type="checkbox" data-dom-id="filter-no-workaholic" class="tag-checkbox sr-only">
+                    <span class="tag-label inline-flex items-center px-4 py-2 bg-card border border-border rounded-full text-sm text-foreground transition-colors select-none">工作狂</span>
+                </label>
+            </div>
+        </section>
+    </main>
+
+    <div class="fixed bottom-0 left-0 right-0 z-20 bg-background/95 backdrop-blur-sm border-t border-border pb-[var(--banban-safe-bottom)]">
+        <div class="px-4 py-4">
+            <button type="button" data-dom-id="btn-apply" class="w-full flex items-center justify-center py-3.5 bg-primary text-primary-foreground rounded-lg font-semibold text-base shadow-sm active:opacity-90 transition-opacity" aria-label="显示 12 位结果">
+                显示 12 位结果
+            </button>
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        // Optional: keep max >= min for age range
+        const minInput = document.querySelector('[data-dom-id="range-age-min"]');
+        const maxInput = document.querySelector('[data-dom-id="range-age-max"]');
+        const slider = document.querySelector('[data-dom-id="range-age-slider"]');
+
+        function syncAgeRange() {
+            let min = parseInt(minInput.value, 10) || 18;
+            let max = parseInt(maxInput.value, 10) || 80;
+            if (min > max) {
+                max = min;
+                maxInput.value = max;
+            }
+            if (slider) slider.value = max;
+        }
+
+        if (minInput) minInput.addEventListener('change', syncAgeRange);
+        if (maxInput) maxInput.addEventListener('change', syncAgeRange);
+        if (slider) {
+            slider.addEventListener('input', function () {
+                if (maxInput) maxInput.value = this.value;
+            });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,1073 @@
+{
+  "data": [
+    {
+      "id": "page-onboarding",
+      "title": "启动页",
+      "type": "page",
+      "version": 1,
+      "createdAt": 1790820124598,
+      "canvasData": {
+        "x": 0,
+        "y": 0,
+        "group": 0,
+        "layoutSnapshot": {
+          "version": 1,
+          "contentHeight": 2848,
+          "viewportWidth": 375,
+          "sourceHash": "fnv1a-d57771d9",
+          "measuredAt": 1791440578076
+        }
+      },
+      "devMetadata": {
+        "htmlSrc": "pages/onboarding.html",
+        "interactions": [
+          {
+            "trigger": {
+              "type": "dom",
+              "domId": "btn-start"
+            },
+            "action": {
+              "type": "navigate",
+              "target": "page-login"
+            }
+          },
+          {
+            "trigger": {
+              "type": "dom",
+              "domId": "btn-login"
+            },
+            "action": {
+              "type": "navigate",
+              "target": "page-login"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "page-login",
+      "title": "手机号登录",
+      "type": "page",
+      "version": 1,
+      "createdAt": 1790820124599,
+      "canvasData": {
+        "x": 169,
+        "y": 0,
+        "group": 0,
+        "layoutSnapshot": {
+          "version": 1,
+          "contentHeight": 900,
+          "viewportWidth": 375,
+          "sourceHash": "fnv1a-114657eb",
+          "measuredAt": 1791440578076
+        }
+      },
+      "devMetadata": {
+        "htmlSrc": "pages/login.html",
+        "interactions": [
+          {
+            "trigger": {
+              "type": "dom",
+              "domId": "btn-get-code"
+            },
+            "action": {
+              "type": "navigate",
+              "target": "page-verify-id"
+            }
+          },
+          {
+            "trigger": {
+              "type": "dom",
+              "domId": "btn-back"
+            },
+            "action": {
+              "type": "navigate",
+              "target": "page-onboarding"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "page-verify-id",
+      "title": "实名认证",
+      "type": "page",
+      "version": 1,
+      "createdAt": 1790820124600,
+      "canvasData": {
+        "x": 338,
+        "y": 0,
+        "group": 0,
+        "layoutSnapshot": {
+          "version": 1,
+          "contentHeight": 900,
+          "viewportWidth": 375,
+          "sourceHash": "fnv1a-d5d27c16",
+          "measuredAt": 1791440578076
+        }
+      },
+      "devMetadata": {
+        "htmlSrc": "pages/verify-id.html",
+        "interactions": [
+          {
+            "trigger": {
+              "type": "dom",
+              "domId": "btn-continue"
+            },
+            "action": {
+              "type": "navigate",
+              "target": "page-permissions"
+            }
+          },
+          {
+            "trigger": {
+              "type": "dom",
+              "domId": "btn-close"
+            },
+            "action": {
+              "type": "navigate",
+              "target": "page-login"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "page-permissions",
+      "title": "权限请求",
+      "type": "page",
+      "version": 1,
+      "createdAt": 1790820124601,
+      "canvasData": {
+        "x": 507,
+        "y": 0,
+        "group": 0,
+        "layoutSnapshot": {
+          "version": 1,
+          "contentHeight": 900,
+          "viewportWidth": 375,
+          "sourceHash": "fnv1a-fb069f7d",
+          "measuredAt": 1791440578076
+        }
+      },
+      "devMetadata": {
+        "htmlSrc": "pages/permissions.html",
+        "interactions": [
+          {
+            "trigger": {
+              "type": "dom",
+              "domId": "btn-enter"
+            },
+            "action": {
+              "type": "navigate",
+              "target": "page-profile-wizard-1"
+            }
+          },
+          {
+            "trigger": {
+              "type": "dom",
+              "domId": "btn-skip"
+            },
+            "action": {
+              "type": "navigate",
+              "target": "page-profile-wizard-1"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "page-profile-wizard-1",
+      "title": "资料创建 · 基础",
+      "type": "page",
+      "version": 1,
+      "createdAt": 1790820124602,
+      "canvasData": {
+        "x": 0,
+        "y": 938,
+        "group": 1,
+        "layoutSnapshot": {
+          "version": 1,
+          "contentHeight": 1017,
+          "viewportWidth": 375,
+          "sourceHash": "fnv1a-dcd9c272",
+          "measuredAt": 1791440578076
+        }
+      },
+      "devMetadata": {
+        "htmlSrc": "pages/profile-wizard-1.html",
+        "interactions": [
+          {
+            "trigger": {
+              "type": "dom",
+              "domId": "btn-next"
+            },
+            "action": {
+              "type": "navigate",
+              "target": "page-profile-wizard-2"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "page-profile-wizard-2",
+      "title": "资料创建 · 生活",
+      "type": "page",
+      "version": 1,
+      "createdAt": 1790820124603,
+      "canvasData": {
+        "x": 169,
+        "y": 938,
+        "group": 1,
+        "layoutSnapshot": {
+          "version": 1,
+          "contentHeight": 900,
+          "viewportWidth": 375,
+          "sourceHash": "fnv1a-c4d2f8f2",
+          "measuredAt": 1791440578076
+        }
+      },
+      "devMetadata": {
+        "htmlSrc": "pages/profile-wizard-2.html",
+        "interactions": [
+          {
+            "trigger": {
+              "type": "dom",
+              "domId": "btn-prev"
+            },
+            "action": {
+              "type": "navigate",
+              "target": "page-profile-wizard-1"
+            }
+          },
+          {
+            "trigger": {
+              "type": "dom",
+              "domId": "btn-next"
+            },
+            "action": {
+              "type": "navigate",
+              "target": "page-profile-wizard-3"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "page-profile-wizard-3",
+      "title": "资料创建 · 意向",
+      "type": "page",
+      "version": 1,
+      "createdAt": 1790820124604,
+      "canvasData": {
+        "x": 338,
+        "y": 938,
+        "group": 1,
+        "layoutSnapshot": {
+          "version": 1,
+          "contentHeight": 1797,
+          "viewportWidth": 375,
+          "sourceHash": "fnv1a-be2afa3f",
+          "measuredAt": 1791440578076
+        }
+      },
+      "devMetadata": {
+        "htmlSrc": "pages/profile-wizard-3.html",
+        "interactions": [
+          {
+            "trigger": {
+              "type": "dom",
+              "domId": "btn-prev"
+            },
+            "action": {
+              "type": "navigate",
+              "target": "page-profile-wizard-2"
+            }
+          },
+          {
+            "trigger": {
+              "type": "dom",
+              "domId": "btn-next"
+            },
+            "action": {
+              "type": "navigate",
+              "target": "page-profile-wizard-4"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "page-profile-wizard-4",
+      "title": "资料创建 · 照片",
+      "type": "page",
+      "version": 1,
+      "createdAt": 1790820124605,
+      "canvasData": {
+        "x": 507,
+        "y": 938,
+        "group": 1,
+        "layoutSnapshot": {
+          "version": 1,
+          "contentHeight": 1375,
+          "viewportWidth": 375,
+          "sourceHash": "fnv1a-a9defed3",
+          "measuredAt": 1791440578076
+        }
+      },
+      "devMetadata": {
+        "htmlSrc": "pages/profile-wizard-4.html",
+        "interactions": [
+          {
+            "trigger": {
+              "type": "dom",
+              "domId": "btn-prev"
+            },
+            "action": {
+              "type": "navigate",
+              "target": "page-profile-wizard-3"
+            }
+          },
+          {
+            "trigger": {
+              "type": "dom",
+              "domId": "btn-finish"
+            },
+            "action": {
+              "type": "navigate",
+              "target": "page-my-profile"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "page-my-profile",
+      "title": "我的资料",
+      "type": "page",
+      "version": 1,
+      "createdAt": 1790820124606,
+      "canvasData": {
+        "x": 676,
+        "y": 938,
+        "group": 1,
+        "layoutSnapshot": {
+          "version": 1,
+          "contentHeight": 1553,
+          "viewportWidth": 375,
+          "sourceHash": "fnv1a-dd0f2db4",
+          "measuredAt": 1791440578076
+        }
+      },
+      "devMetadata": {
+        "htmlSrc": "pages/my-profile.html",
+        "interactions": [
+          {
+            "trigger": {
+              "type": "dom",
+              "domId": "btn-edit"
+            },
+            "action": {
+              "type": "navigate",
+              "target": "page-profile-wizard-1"
+            }
+          },
+          {
+            "trigger": {
+              "type": "dom",
+              "domId": "nav-home"
+            },
+            "action": {
+              "type": "navigate",
+              "target": "page-home"
+            }
+          },
+          {
+            "trigger": {
+              "type": "dom",
+              "domId": "nav-messages"
+            },
+            "action": {
+              "type": "navigate",
+              "target": "page-messages"
+            }
+          },
+          {
+            "trigger": {
+              "type": "dom",
+              "domId": "nav-square"
+            },
+            "action": {
+              "type": "navigate",
+              "target": "page-home"
+            }
+          },
+          {
+            "trigger": {
+              "type": "dom",
+              "domId": "nav-profile"
+            },
+            "action": {
+              "type": "navigate",
+              "target": "page-my-profile"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "page-home",
+      "title": "推荐首页",
+      "type": "page",
+      "version": 1,
+      "createdAt": 1790820124607,
+      "canvasData": {
+        "x": 0,
+        "y": 1570,
+        "group": 2,
+        "layoutSnapshot": {
+          "version": 1,
+          "contentHeight": 900,
+          "viewportWidth": 375,
+          "sourceHash": "fnv1a-001d18cf",
+          "measuredAt": 1791440578076
+        }
+      },
+      "devMetadata": {
+        "htmlSrc": "pages/home.html",
+        "interactions": [
+          {
+            "trigger": {
+              "type": "dom",
+              "domId": "card-detail"
+            },
+            "action": {
+              "type": "navigate",
+              "target": "page-profile-detail"
+            }
+          },
+          {
+            "trigger": {
+              "type": "dom",
+              "domId": "btn-filter"
+            },
+            "action": {
+              "type": "navigate",
+              "target": "page-filter"
+            }
+          },
+          {
+            "trigger": {
+              "type": "dom",
+              "domId": "btn-like"
+            },
+            "action": {
+              "type": "navigate",
+              "target": "page-match-success"
+            }
+          },
+          {
+            "trigger": {
+              "type": "dom",
+              "domId": "btn-skip"
+            },
+            "action": {
+              "type": "navigate",
+              "target": "page-home"
+            }
+          },
+          {
+            "trigger": {
+              "type": "dom",
+              "domId": "nav-home"
+            },
+            "action": {
+              "type": "navigate",
+              "target": "page-home"
+            }
+          },
+          {
+            "trigger": {
+              "type": "dom",
+              "domId": "nav-messages"
+            },
+            "action": {
+              "type": "navigate",
+              "target": "page-messages"
+            }
+          },
+          {
+            "trigger": {
+              "type": "dom",
+              "domId": "nav-square"
+            },
+            "action": {
+              "type": "navigate",
+              "target": "page-home"
+            }
+          },
+          {
+            "trigger": {
+              "type": "dom",
+              "domId": "nav-profile"
+            },
+            "action": {
+              "type": "navigate",
+              "target": "page-my-profile"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "page-filter",
+      "title": "筛选面板",
+      "type": "page",
+      "version": 1,
+      "createdAt": 1790820124608,
+      "canvasData": {
+        "x": 169,
+        "y": 1570,
+        "group": 2,
+        "layoutSnapshot": {
+          "version": 1,
+          "contentHeight": 1633,
+          "viewportWidth": 375,
+          "sourceHash": "fnv1a-e40d6b79",
+          "measuredAt": 1791440578076
+        }
+      },
+      "devMetadata": {
+        "htmlSrc": "pages/filter.html",
+        "interactions": [
+          {
+            "trigger": {
+              "type": "dom",
+              "domId": "btn-back"
+            },
+            "action": {
+              "type": "navigate",
+              "target": "page-home"
+            }
+          },
+          {
+            "trigger": {
+              "type": "dom",
+              "domId": "btn-apply"
+            },
+            "action": {
+              "type": "navigate",
+              "target": "page-home"
+            }
+          },
+          {
+            "trigger": {
+              "type": "dom",
+              "domId": "btn-reset"
+            },
+            "action": {
+              "type": "navigate",
+              "target": "page-filter"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "page-profile-detail",
+      "title": "他人资料",
+      "type": "page",
+      "version": 1,
+      "createdAt": 1790820124609,
+      "canvasData": {
+        "x": 338,
+        "y": 1570,
+        "group": 2,
+        "layoutSnapshot": {
+          "version": 1,
+          "contentHeight": 1284,
+          "viewportWidth": 375,
+          "sourceHash": "fnv1a-f7d32c8b",
+          "measuredAt": 1791440578076
+        }
+      },
+      "devMetadata": {
+        "htmlSrc": "pages/profile-detail.html",
+        "interactions": [
+          {
+            "trigger": {
+              "type": "dom",
+              "domId": "btn-back"
+            },
+            "action": {
+              "type": "navigate",
+              "target": "page-home"
+            }
+          },
+          {
+            "trigger": {
+              "type": "dom",
+              "domId": "btn-like"
+            },
+            "action": {
+              "type": "navigate",
+              "target": "page-match-success"
+            }
+          },
+          {
+            "trigger": {
+              "type": "dom",
+              "domId": "btn-skip"
+            },
+            "action": {
+              "type": "navigate",
+              "target": "page-home"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "page-match-success",
+      "title": "匹配成功",
+      "type": "page",
+      "version": 1,
+      "createdAt": 1790820124610,
+      "canvasData": {
+        "x": 507,
+        "y": 1570,
+        "group": 2,
+        "layoutSnapshot": {
+          "version": 1,
+          "contentHeight": 900,
+          "viewportWidth": 375,
+          "sourceHash": "fnv1a-8fa563cb",
+          "measuredAt": 1791440578076
+        }
+      },
+      "devMetadata": {
+        "htmlSrc": "pages/match-success.html",
+        "interactions": [
+          {
+            "trigger": {
+              "type": "dom",
+              "domId": "btn-message"
+            },
+            "action": {
+              "type": "navigate",
+              "target": "page-chat"
+            }
+          },
+          {
+            "trigger": {
+              "type": "dom",
+              "domId": "btn-continue"
+            },
+            "action": {
+              "type": "navigate",
+              "target": "page-home"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "page-messages",
+      "title": "消息列表",
+      "type": "page",
+      "version": 1,
+      "createdAt": 1790820124611,
+      "canvasData": {
+        "x": 0,
+        "y": 2155,
+        "group": 3,
+        "layoutSnapshot": {
+          "version": 1,
+          "contentHeight": 900,
+          "viewportWidth": 375,
+          "sourceHash": "fnv1a-765af149",
+          "measuredAt": 1791440578076
+        }
+      },
+      "devMetadata": {
+        "htmlSrc": "pages/messages.html",
+        "interactions": [
+          {
+            "trigger": {
+              "type": "dom",
+              "domId": "chat-1"
+            },
+            "action": {
+              "type": "navigate",
+              "target": "page-chat"
+            }
+          },
+          {
+            "trigger": {
+              "type": "dom",
+              "domId": "chat-2"
+            },
+            "action": {
+              "type": "navigate",
+              "target": "page-chat"
+            }
+          },
+          {
+            "trigger": {
+              "type": "dom",
+              "domId": "tab-chat"
+            },
+            "action": {
+              "type": "navigate",
+              "target": "page-messages"
+            }
+          },
+          {
+            "trigger": {
+              "type": "dom",
+              "domId": "tab-likes"
+            },
+            "action": {
+              "type": "navigate",
+              "target": "page-messages"
+            }
+          },
+          {
+            "trigger": {
+              "type": "dom",
+              "domId": "nav-home"
+            },
+            "action": {
+              "type": "navigate",
+              "target": "page-home"
+            }
+          },
+          {
+            "trigger": {
+              "type": "dom",
+              "domId": "nav-messages"
+            },
+            "action": {
+              "type": "navigate",
+              "target": "page-messages"
+            }
+          },
+          {
+            "trigger": {
+              "type": "dom",
+              "domId": "nav-square"
+            },
+            "action": {
+              "type": "navigate",
+              "target": "page-home"
+            }
+          },
+          {
+            "trigger": {
+              "type": "dom",
+              "domId": "nav-profile"
+            },
+            "action": {
+              "type": "navigate",
+              "target": "page-my-profile"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "page-chat",
+      "title": "聊天界面",
+      "type": "page",
+      "version": 1,
+      "createdAt": 1790820124612,
+      "canvasData": {
+        "x": 169,
+        "y": 2155,
+        "group": 3,
+        "layoutSnapshot": {
+          "version": 1,
+          "contentHeight": 900,
+          "viewportWidth": 375,
+          "sourceHash": "fnv1a-649e9bb6",
+          "measuredAt": 1791440578076
+        }
+      },
+      "devMetadata": {
+        "htmlSrc": "pages/chat.html",
+        "interactions": [
+          {
+            "trigger": {
+              "type": "dom",
+              "domId": "btn-back"
+            },
+            "action": {
+              "type": "navigate",
+              "target": "page-messages"
+            }
+          },
+          {
+            "trigger": {
+              "type": "dom",
+              "domId": "btn-report"
+            },
+            "action": {
+              "type": "navigate",
+              "target": "page-safety"
+            }
+          },
+          {
+            "trigger": {
+              "type": "dom",
+              "domId": "btn-send"
+            },
+            "action": {
+              "type": "navigate",
+              "target": "page-chat"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "page-safety",
+      "title": "安全中心",
+      "type": "page",
+      "version": 1,
+      "createdAt": 1790820124613,
+      "canvasData": {
+        "x": 0,
+        "y": 2527,
+        "group": 4,
+        "layoutSnapshot": {
+          "version": 1,
+          "contentHeight": 900,
+          "viewportWidth": 375,
+          "sourceHash": "fnv1a-2b6707b6",
+          "measuredAt": 1790822762658
+        }
+      },
+      "devMetadata": {
+        "htmlSrc": "pages/safety.html",
+        "interactions": [
+          {
+            "trigger": {
+              "type": "dom",
+              "domId": "btn-back"
+            },
+            "action": {
+              "type": "navigate",
+              "target": "page-my-profile"
+            }
+          },
+          {
+            "trigger": {
+              "type": "dom",
+              "domId": "row-emergency"
+            },
+            "action": {
+              "type": "navigate",
+              "target": "page-settings"
+            }
+          },
+          {
+            "trigger": {
+              "type": "dom",
+              "domId": "nav-home"
+            },
+            "action": {
+              "type": "navigate",
+              "target": "page-home"
+            }
+          },
+          {
+            "trigger": {
+              "type": "dom",
+              "domId": "nav-messages"
+            },
+            "action": {
+              "type": "navigate",
+              "target": "page-messages"
+            }
+          },
+          {
+            "trigger": {
+              "type": "dom",
+              "domId": "nav-square"
+            },
+            "action": {
+              "type": "navigate",
+              "target": "page-home"
+            }
+          },
+          {
+            "trigger": {
+              "type": "dom",
+              "domId": "nav-profile"
+            },
+            "action": {
+              "type": "navigate",
+              "target": "page-my-profile"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "page-privacy",
+      "title": "隐私设置",
+      "type": "page",
+      "version": 1,
+      "createdAt": 1790820124614,
+      "canvasData": {
+        "x": 169,
+        "y": 2527,
+        "group": 4,
+        "layoutSnapshot": {
+          "version": 1,
+          "contentHeight": 900,
+          "viewportWidth": 375,
+          "sourceHash": "fnv1a-43539cce",
+          "measuredAt": 1790822762658
+        }
+      },
+      "devMetadata": {
+        "htmlSrc": "pages/privacy.html",
+        "interactions": [
+          {
+            "trigger": {
+              "type": "dom",
+              "domId": "btn-back"
+            },
+            "action": {
+              "type": "navigate",
+              "target": "page-settings"
+            }
+          },
+          {
+            "trigger": {
+              "type": "dom",
+              "domId": "nav-home"
+            },
+            "action": {
+              "type": "navigate",
+              "target": "page-home"
+            }
+          },
+          {
+            "trigger": {
+              "type": "dom",
+              "domId": "nav-messages"
+            },
+            "action": {
+              "type": "navigate",
+              "target": "page-messages"
+            }
+          },
+          {
+            "trigger": {
+              "type": "dom",
+              "domId": "nav-square"
+            },
+            "action": {
+              "type": "navigate",
+              "target": "page-home"
+            }
+          },
+          {
+            "trigger": {
+              "type": "dom",
+              "domId": "nav-profile"
+            },
+            "action": {
+              "type": "navigate",
+              "target": "page-my-profile"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "page-settings",
+      "title": "设置",
+      "type": "page",
+      "version": 1,
+      "createdAt": 1790820124615,
+      "canvasData": {
+        "x": 338,
+        "y": 2527,
+        "group": 4,
+        "layoutSnapshot": {
+          "version": 1,
+          "contentHeight": 972,
+          "viewportWidth": 375,
+          "sourceHash": "fnv1a-38f543f5",
+          "measuredAt": 1790822762658
+        }
+      },
+      "devMetadata": {
+        "htmlSrc": "pages/settings.html",
+        "interactions": [
+          {
+            "trigger": {
+              "type": "dom",
+              "domId": "btn-back"
+            },
+            "action": {
+              "type": "navigate",
+              "target": "page-my-profile"
+            }
+          },
+          {
+            "trigger": {
+              "type": "dom",
+              "domId": "row-privacy"
+            },
+            "action": {
+              "type": "navigate",
+              "target": "page-privacy"
+            }
+          },
+          {
+            "trigger": {
+              "type": "dom",
+              "domId": "row-verify"
+            },
+            "action": {
+              "type": "navigate",
+              "target": "page-verify-id"
+            }
+          },
+          {
+            "trigger": {
+              "type": "dom",
+              "domId": "btn-logout"
+            },
+            "action": {
+              "type": "navigate",
+              "target": "page-onboarding"
+            }
+          },
+          {
+            "trigger": {
+              "type": "dom",
+              "domId": "nav-profile"
+            },
+            "action": {
+              "type": "navigate",
+              "target": "page-my-profile"
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "config": {
+    "autoLayout": true,
+    "deviceType": "mobile",
+    "projectName": "伴伴 BanBan",
+    "designLibrary": null,
+    "visualEditorEnabled": false
+  }
+}

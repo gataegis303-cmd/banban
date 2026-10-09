@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#000000">
+    <title>资料创建 · 意向</title>
+    <style id="theme-vars">
+/* BanBan Design Tokens — 不婚者异性搭伴生活中介平台 */
+
+:root {
+  /* Brand primary — Apple System Blue */
+  --banban-primary-50: #e8f2ff;
+  --banban-primary-100: #cfe5ff;
+  --banban-primary-200: #9fcbff;
+  --banban-primary-300: #66abff;
+  --banban-primary-400: #2e8dff;
+  --banban-primary-500: #007aff;
+  --banban-primary-600: #0064d6;
+  --banban-primary-700: #004fad;
+  --banban-primary-800: #003b82;
+  --banban-primary-900: #00275a;
+  --banban-primary-950: #001c40;
+
+  /* Neutral scale — iOS system grays */
+  --banban-neutral-0: #ffffff;
+  --banban-neutral-50: #f7f7fa;
+  --banban-neutral-100: #f2f2f7;
+  --banban-neutral-200: #e5e5ea;
+  --banban-neutral-300: #d1d1d6;
+  --banban-neutral-400: #aeaeb2;
+  --banban-neutral-500: #8e8e93;
+  --banban-neutral-600: #6e6e73;
+  --banban-neutral-700: #48484a;
+  --banban-neutral-800: #2c2c2e;
+  --banban-neutral-900: #1d1d1f;
+  --banban-neutral-950: #0a0a0c;
+
+  /* Semantic states — Apple system colors */
+  --banban-success: #34c759;
+  --banban-success-foreground: #ffffff;
+  --banban-success-subtle: #e9f9ee;
+  --banban-warning: #ff9500;
+  --banban-warning-foreground: #1d1d1f;
+  --banban-warning-subtle: #fff2e0;
+  --banban-error: #ff3b30;
+  --banban-error-foreground: #ffffff;
+  --banban-error-subtle: #ffecea;
+  --banban-info: #007aff;
+  --banban-info-foreground: #ffffff;
+  --banban-info-subtle: #e8f2ff;
+
+  /* Semantic aliases — light mode */
+  --banban-background: var(--banban-neutral-0);
+  --banban-foreground: var(--banban-neutral-900);
+  --banban-card: var(--banban-neutral-0);
+  --banban-card-foreground: var(--banban-neutral-900);
+  --banban-popover: var(--banban-neutral-0);
+  --banban-popover-foreground: var(--banban-neutral-900);
+  --banban-primary: var(--banban-primary-500);
+  --banban-primary-foreground: var(--banban-neutral-0);
+  --banban-muted: var(--banban-neutral-100);
+  --banban-muted-foreground: var(--banban-neutral-500);
+  --banban-border: var(--banban-neutral-200);
+  --banban-input: var(--banban-neutral-300);
+  --banban-ring: var(--banban-primary-500);
+
+  /* Radius scale */
+  --banban-radius-small: 4px;
+  --banban-radius-medium: 8px;
+  --banban-radius-large: 12px;
+  --banban-radius-full: 9999px;
+
+  /* Shadows — Apple hairline elevations (light); floating layers may be deeper */
+  --banban-shadow-1: 0 1px 2px rgba(0, 0, 0, 0.04), 0 1px 1px rgba(0, 0, 0, 0.03);
+  --banban-shadow-2: 0 8px 24px -8px rgba(0, 0, 0, 0.08), 0 4px 8px -4px rgba(0, 0, 0, 0.05);
+  --banban-shadow-3: 0 24px 64px -12px rgba(0, 0, 0, 0.12);
+
+  /* Typography */
+  --banban-font-sans: -apple-system, BlinkMacSystemFont, "SF Pro", "PingFang SC", "Noto Sans SC", "Microsoft YaHei", system-ui, sans-serif;
+  --banban-font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
+  /* iOS safe areas */
+  --banban-safe-top: env(safe-area-inset-top, 0px);
+  --banban-safe-bottom: env(safe-area-inset-bottom, 0px);
+  --banban-safe-left: env(safe-area-inset-left, 0px);
+  --banban-safe-right: env(safe-area-inset-right, 0px);
+}
+
+/* Dark mode — Apple system dark (default appearance) */
+.dark {
+  --banban-background: #000000;
+  --banban-foreground: #f5f5f7;
+  --banban-card: #1c1c1e;
+  --banban-card-foreground: #f5f5f7;
+  --banban-popover: #3a3a3c;
+  --banban-popover-foreground: #f5f5f7;
+  --banban-primary: var(--banban-primary-400);
+  --banban-primary-foreground: #000000;
+  --banban-muted: #1c1c1e;
+  --banban-muted-foreground: #8e8e93;
+  --banban-border: #3a3a3c;
+  --banban-input: #3a3a3c;
+  --banban-ring: var(--banban-primary-400);
+
+  /* Status subtle backgrounds — dark-tuned tints (Apple system hues) */
+  --banban-success-subtle: #142e1f;
+  --banban-warning-subtle: #33230e;
+  --banban-error-subtle: #331513;
+  --banban-info-subtle: #0f2338;
+
+  /* Elevated shadows for dark surfaces — Apple dark elevations */
+  --banban-shadow-1: 0 1px 2px rgba(0, 0, 0, 0.30);
+  --banban-shadow-2: 0 8px 24px -8px rgba(0, 0, 0, 0.50), 0 4px 8px -4px rgba(0, 0, 0, 0.40);
+  --banban-shadow-3: 0 24px 64px -12px rgba(0, 0, 0, 0.60);
+}
+
+/* Base typography classes */
+.banban-text-display {
+  font-family: var(--banban-font-sans);
+  font-size: clamp(32px, 8vw, 48px);
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+.banban-text-h1 {
+  font-family: var(--banban-font-sans);
+  font-size: clamp(24px, 6vw, 32px);
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.015em;
+}
+
+.banban-text-h2 {
+  font-family: var(--banban-font-sans);
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.banban-text-body {
+  font-family: var(--banban-font-sans);
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1.6;
+}
+
+.banban-text-body-large {
+  font-family: var(--banban-font-sans);
+  font-size: 17px;
+  font-weight: 400;
+  line-height: 1.55;
+}
+
+.banban-text-caption {
+  font-family: var(--banban-font-sans);
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.5;
+}
+
+.banban-text-label {
+  font-family: var(--banban-font-sans);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.4;
+}
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.3.1/dist/index.global.js"></script>
+    <script src="https://unpkg.com/lucide@1.8.0/dist/umd/lucide.min.js"></script>
+    <style type="text/tailwindcss">
+  @theme inline {
+    --color-background: var(--banban-background);
+    --color-foreground: var(--banban-foreground);
+    --color-card: var(--banban-card);
+    --color-card-foreground: var(--banban-card-foreground);
+    --color-popover: var(--banban-popover);
+    --color-popover-foreground: var(--banban-popover-foreground);
+    --color-primary: var(--banban-primary);
+    --color-primary-foreground: var(--banban-primary-foreground);
+    --color-muted: var(--banban-muted);
+    --color-muted-foreground: var(--banban-muted-foreground);
+    --color-border: var(--banban-border);
+    --color-input: var(--banban-input);
+    --color-ring: var(--banban-ring);
+    --radius-sm: var(--banban-radius-small);
+    --radius-md: var(--banban-radius-medium);
+    --radius-lg: var(--banban-radius-large);
+  }
+  @layer base {
+    body { background: var(--banban-background); color: var(--banban-foreground); }
+    td, th { @apply break-words; word-break: break-all; word-break: auto-phrase; }
+    th { @apply whitespace-nowrap; }
+  }
+    </style>
+    <style id="semantic-token-fallback">
+      .bg-background { background-color: var(--banban-background); }
+      .text-background { color: var(--banban-background); }
+      .border-background { border-color: var(--banban-background); }
+      .ring-background { --tw-ring-color: var(--banban-background); }
+      .bg-foreground { background-color: var(--banban-foreground); }
+      .text-foreground { color: var(--banban-foreground); }
+      .border-foreground { border-color: var(--banban-foreground); }
+      .ring-foreground { --tw-ring-color: var(--banban-foreground); }
+      .bg-card { background-color: var(--banban-card); }
+      .text-card { color: var(--banban-card); }
+      .border-card { border-color: var(--banban-card); }
+      .ring-card { --tw-ring-color: var(--banban-card); }
+      .bg-card-foreground { background-color: var(--banban-card-foreground); }
+      .text-card-foreground { color: var(--banban-card-foreground); }
+      .border-card-foreground { border-color: var(--banban-card-foreground); }
+      .ring-card-foreground { --tw-ring-color: var(--banban-card-foreground); }
+      .bg-popover { background-color: var(--banban-popover); }
+      .text-popover { color: var(--banban-popover); }
+      .border-popover { border-color: var(--banban-popover); }
+      .ring-popover { --tw-ring-color: var(--banban-popover); }
+      .bg-popover-foreground { background-color: var(--banban-popover-foreground); }
+      .text-popover-foreground { color: var(--banban-popover-foreground); }
+      .border-popover-foreground { border-color: var(--banban-popover-foreground); }
+      .ring-popover-foreground { --tw-ring-color: var(--banban-popover-foreground); }
+      .bg-primary { background-color: var(--banban-primary); }
+      .text-primary { color: var(--banban-primary); }
+      .border-primary { border-color: var(--banban-primary); }
+      .ring-primary { --tw-ring-color: var(--banban-primary); }
+      .bg-primary-foreground { background-color: var(--banban-primary-foreground); }
+      .text-primary-foreground { color: var(--banban-primary-foreground); }
+      .border-primary-foreground { border-color: var(--banban-primary-foreground); }
+      .ring-primary-foreground { --tw-ring-color: var(--banban-primary-foreground); }
+      .bg-muted { background-color: var(--banban-muted); }
+      .text-muted { color: var(--banban-muted); }
+      .border-muted { border-color: var(--banban-muted); }
+      .ring-muted { --tw-ring-color: var(--banban-muted); }
+      .bg-muted-foreground { background-color: var(--banban-muted-foreground); }
+      .text-muted-foreground { color: var(--banban-muted-foreground); }
+      .border-muted-foreground { border-color: var(--banban-muted-foreground); }
+      .ring-muted-foreground { --tw-ring-color: var(--banban-muted-foreground); }
+      .bg-border { background-color: var(--banban-border); }
+      .text-border { color: var(--banban-border); }
+      .border-border { border-color: var(--banban-border); }
+      .ring-border { --tw-ring-color: var(--banban-border); }
+      .bg-input { background-color: var(--banban-input); }
+      .text-input { color: var(--banban-input); }
+      .border-input { border-color: var(--banban-input); }
+      .ring-input { --tw-ring-color: var(--banban-input); }
+      .bg-ring { background-color: var(--banban-ring); }
+      .text-ring { color: var(--banban-ring); }
+      .border-ring { border-color: var(--banban-ring); }
+      .ring-ring { --tw-ring-color: var(--banban-ring); }
+    </style>
+    <style>
+      .no-scrollbar::-webkit-scrollbar { display: none; }
+      .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+      [data-icon] {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        -webkit-mask-size: contain;
+        mask-size: contain;
+        -webkit-mask-repeat: no-repeat;
+        mask-repeat: no-repeat;
+        -webkit-mask-position: center;
+        mask-position: center;
+        background-color: currentColor;
+      }
+      .pb-safe { padding-bottom: var(--banban-safe-bottom); }
+    </style>
+</head>
+<body class="min-h-screen bg-background font-sans antialiased">
+  <main class="min-h-screen w-full px-6 pb-52 pt-8" style="padding-top: 0px; flex-direction: column; flex-wrap: nowrap; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: repeat(2, minmax(0, 1fr)); display: block;">
+    <!-- Progress header -->
+    <section class="mb-8" aria-label="进度">
+      <div class="flex items-center justify-between mb-3">
+        <span class="banban-text-caption text-muted-foreground">步骤 3/4</span>
+        <span class="banban-text-caption text-primary">75%</span>
+      </div>
+      <div class="h-1.5 w-full overflow-hidden rounded-full bg-muted">
+        <div class="h-full w-3/4 rounded-full bg-primary"></div>
+      </div>
+      <h1 class="banban-text-h1 mt-5 text-foreground">搭伴意向</h1>
+      <p class="banban-text-body mt-1 text-muted-foreground">谈谈你对搭伴生活的期待与边界</p>
+    </section>
+
+    <!-- Form -->
+    <form class="space-y-5" autocomplete="off" onsubmit="event.preventDefault();">
+      <div class="space-y-1.5">
+        <span class="banban-text-label text-foreground">搭伴方向</span>
+        <div class="grid grid-cols-3 gap-2 rounded-lg border border-border bg-input p-1">
+          <button type="button" data-dom-id="direction-marriage" aria-pressed="false" class="segment-btn banban-text-body rounded-md py-2.5 text-center font-medium transition-colors text-muted-foreground hover:bg-muted hover:text-foreground">
+            领证结婚
+          </button>
+          <button type="button" data-dom-id="direction-agreement" aria-pressed="false" class="segment-btn banban-text-body rounded-md py-2.5 text-center font-medium transition-colors text-muted-foreground hover:bg-muted hover:text-foreground">
+            协议搭伴
+          </button>
+          <button type="button" data-dom-id="direction-freestyle" aria-pressed="false" class="segment-btn banban-text-body rounded-md py-2.5 text-center font-medium transition-colors text-muted-foreground hover:bg-muted hover:text-foreground">
+            自由式
+          </button>
+        </div>
+      </div>
+
+      <div class="space-y-1.5">
+        <span class="banban-text-label text-foreground">可接受伴侣状态</span>
+        <div class="grid grid-cols-3 gap-2 rounded-lg border border-border bg-input p-1">
+          <button type="button" data-dom-id="status-unmarried" aria-pressed="false" class="segment-btn banban-text-body rounded-md py-2.5 text-center font-medium transition-colors text-muted-foreground hover:bg-muted hover:text-foreground">
+            未婚无伴侣
+          </button>
+          <button type="button" data-dom-id="status-same-sex-partner" aria-pressed="false" class="segment-btn banban-text-body rounded-md py-2.5 text-center font-medium transition-colors text-muted-foreground hover:bg-muted hover:text-foreground">
+            有同性伴侣
+          </button>
+          <button type="button" data-dom-id="status-divorced" aria-pressed="false" class="segment-btn banban-text-body rounded-md py-2.5 text-center font-medium transition-colors text-muted-foreground hover:bg-muted hover:text-foreground">
+            离异
+          </button>
+        </div>
+      </div>
+
+      <div class="space-y-1.5">
+        <div class="flex items-center gap-1.5">
+          <span class="banban-text-label text-foreground">搭伴对象</span>
+          <button type="button" data-dom-id="btn-seek-help" aria-label="搭伴对象选项说明" aria-haspopup="dialog" class="inline-flex h-6 w-6 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus:outline-none focus:ring-2 focus:ring-ring/40">
+            <i data-lucide="alert-circle" class="h-4 w-4"></i>
+          </button>
+        </div>
+        <div class="grid grid-cols-3 gap-2 rounded-lg border border-border bg-input p-1">
+          <button type="button" data-dom-id="seek-opposite" aria-pressed="false" class="segment-btn banban-text-body rounded-md py-2.5 text-center font-medium transition-colors text-muted-foreground hover:bg-muted hover:text-foreground">
+            异性
+          </button>
+          <button type="button" data-dom-id="seek-same" aria-pressed="false" class="segment-btn banban-text-body rounded-md py-2.5 text-center font-medium transition-colors text-muted-foreground hover:bg-muted hover:text-foreground">
+            同性
+          </button>
+          <button type="button" data-dom-id="seek-any" aria-pressed="false" class="segment-btn banban-text-body rounded-md py-2.5 text-center font-medium transition-colors text-muted-foreground hover:bg-muted hover:text-foreground">
+            不限
+          </button>
+        </div>
+      </div>
+
+      <div class="space-y-1.5">
+        <span class="banban-text-label text-foreground">居住模式</span>
+        <div class="grid grid-cols-3 gap-2 rounded-lg border border-border bg-input p-1">
+          <button type="button" data-dom-id="live-together" aria-pressed="false" class="segment-btn banban-text-body rounded-md py-2.5 text-center font-medium transition-colors text-muted-foreground hover:bg-muted hover:text-foreground">
+            同居同房
+          </button>
+          <button type="button" data-dom-id="live-separate" aria-pressed="false" class="segment-btn banban-text-body rounded-md py-2.5 text-center font-medium transition-colors text-muted-foreground hover:bg-muted hover:text-foreground">
+            同居分房
+          </button>
+          <button type="button" data-dom-id="live-flexible" aria-pressed="false" class="segment-btn banban-text-body rounded-md py-2.5 text-center font-medium transition-colors text-muted-foreground hover:bg-muted hover:text-foreground">
+            同城分居
+          </button>
+        </div>
+      </div>
+
+      <div class="space-y-1.5" style="width: 327px; height: 83px;">
+        <span class="banban-text-label text-foreground">试用期财务管理</span>
+        <div class="grid grid-cols-3 gap-2 rounded-lg border border-border bg-input p-1">
+          <button type="button" data-dom-id="finance-aa" aria-pressed="false" class="segment-btn banban-text-body rounded-md py-2.5 text-center font-medium transition-colors text-muted-foreground hover:bg-muted hover:text-foreground">
+            AA
+          </button>
+          <button type="button" data-dom-id="finance-ratio" aria-pressed="false" class="segment-btn banban-text-body rounded-md py-2.5 text-center font-medium transition-colors text-muted-foreground hover:bg-muted hover:text-foreground">
+            按收入比例
+          </button>
+          <button type="button" data-dom-id="finance-discuss" aria-pressed="false" class="segment-btn banban-text-body rounded-md py-2.5 text-center font-medium transition-colors text-muted-foreground hover:bg-muted hover:text-foreground">
+            一事一议
+          </button>
+        </div>
+      </div>
+
+      <div class="space-y-1.5">
+        <span class="banban-text-label text-foreground">正式关系后财务管理</span>
+        <div class="grid grid-cols-2 gap-2 rounded-lg border border-border bg-input p-1">
+          <button type="button" data-dom-id="wealth-aa" aria-pressed="false" class="segment-btn banban-text-body rounded-md py-2.5 text-center font-medium transition-colors text-muted-foreground hover:bg-muted hover:text-foreground">
+            AA
+          </button>
+          <button type="button" data-dom-id="wealth-ratio" aria-pressed="false" class="segment-btn banban-text-body rounded-md py-2.5 text-center font-medium transition-colors text-muted-foreground hover:bg-muted hover:text-foreground">
+            按收入比例
+          </button>
+          <button type="button" data-dom-id="wealth-discuss" aria-pressed="false" class="segment-btn banban-text-body rounded-md py-2.5 text-center font-medium transition-colors text-muted-foreground hover:bg-muted hover:text-foreground">
+            一事一议
+          </button>
+          <button type="button" data-dom-id="wealth-joint" aria-pressed="false" class="segment-btn banban-text-body rounded-md py-2.5 text-center font-medium transition-colors text-muted-foreground hover:bg-muted hover:text-foreground">
+            共同财富
+          </button>
+        </div>
+      </div>
+
+      <div class="space-y-1.5">
+        <span class="banban-text-label text-foreground">是否生育</span>
+        <div class="grid grid-cols-4 gap-2 rounded-lg border border-border bg-input p-1">
+          <button type="button" data-dom-id="child-yes" aria-pressed="false" class="segment-btn banban-text-body rounded-md py-2.5 text-center font-medium transition-colors text-muted-foreground hover:bg-muted hover:text-foreground">
+            是
+          </button>
+          <button type="button" data-dom-id="child-no" aria-pressed="false" class="segment-btn banban-text-body rounded-md py-2.5 text-center font-medium transition-colors text-muted-foreground hover:bg-muted hover:text-foreground">
+            否
+          </button>
+          <button type="button" data-dom-id="child-adopt" aria-pressed="false" class="segment-btn banban-text-body rounded-md py-2.5 text-center font-medium transition-colors text-muted-foreground hover:bg-muted hover:text-foreground">
+            领养
+          </button>
+          <button type="button" data-dom-id="child-uncertain" aria-pressed="false" class="segment-btn banban-text-body rounded-md py-2.5 text-center font-medium transition-colors text-muted-foreground hover:bg-muted hover:text-foreground">
+            不确定
+          </button>
+        </div>
+      </div>
+
+      <div class="space-y-1.5">
+        <span class="banban-text-label text-foreground">社交边界</span>
+        <div class="grid grid-cols-3 gap-2 rounded-lg border border-border bg-input p-1">
+          <button type="button" data-dom-id="social-independent" aria-pressed="false" class="segment-btn banban-text-body rounded-md py-2.5 text-center font-medium transition-colors text-muted-foreground hover:bg-muted hover:text-foreground">
+            保持独立社交
+          </button>
+          <button type="button" data-dom-id="social-together" aria-pressed="false" class="segment-btn banban-text-body rounded-md py-2.5 text-center font-medium transition-colors text-muted-foreground hover:bg-muted hover:text-foreground">
+            共同朋友圈
+          </button>
+          <button type="button" data-dom-id="social-discuss" aria-pressed="false" class="segment-btn banban-text-body rounded-md py-2.5 text-center font-medium transition-colors text-muted-foreground hover:bg-muted hover:text-foreground">
+            可商量
+          </button>
+        </div>
+      </div>
+
+      <div class="space-y-1.5">
+        <span class="banban-text-label text-foreground">与父母关系</span>
+        <div class="grid grid-cols-2 gap-2 rounded-lg border border-border bg-input p-1">
+          <button type="button" data-dom-id="parent-together" aria-pressed="false" class="segment-btn banban-text-body rounded-md py-2.5 text-center font-medium transition-colors text-muted-foreground hover:bg-muted hover:text-foreground">
+            与其同住
+          </button>
+          <button type="button" data-dom-id="parent-nearby" aria-pressed="false" class="segment-btn banban-text-body rounded-md py-2.5 text-center font-medium transition-colors text-muted-foreground hover:bg-muted hover:text-foreground">
+            同城居住
+          </button>
+          <button type="button" data-dom-id="parent-remote" aria-pressed="false" class="segment-btn banban-text-body rounded-md py-2.5 text-center font-medium transition-colors text-muted-foreground hover:bg-muted hover:text-foreground">
+            脱离关系
+          </button>
+          <button type="button" data-dom-id="parent-other" aria-pressed="false" class="segment-btn banban-text-body rounded-md py-2.5 text-center font-medium transition-colors text-muted-foreground hover:bg-muted hover:text-foreground">
+            父母双亡
+          </button>
+        </div>
+      </div>
+
+      <div class="space-y-1.5">
+        <span class="banban-text-label text-foreground">我不能接受</span>
+        <span class="banban-text-caption text-muted-foreground block">可多选 · 匹配时帮你避开这些特质</span>
+        <p class="banban-text-caption text-muted-foreground pt-1">负面词</p>
+        <div class="flex flex-wrap gap-2">
+          <button type="button" data-dom-id="no-mama" aria-pressed="false" class="rounded-full border border-border bg-card px-4 py-2 banban-text-body text-muted-foreground transition-colors hover:bg-muted hover:text-foreground">
+            妈宝
+          </button>
+          <button type="button" data-dom-id="no-sloppy" aria-pressed="false" class="rounded-full border border-border bg-card px-4 py-2 banban-text-body text-muted-foreground transition-colors hover:bg-muted hover:text-foreground">
+            邋遢
+          </button>
+          <button type="button" data-dom-id="no-fickle" aria-pressed="false" class="rounded-full border border-border bg-card px-4 py-2 banban-text-body text-muted-foreground transition-colors hover:bg-muted hover:text-foreground">
+            花心
+          </button>
+          <button type="button" data-dom-id="no-cold" aria-pressed="false" class="rounded-full border border-border bg-card px-4 py-2 banban-text-body text-muted-foreground transition-colors hover:bg-muted hover:text-foreground">
+            冷暴力
+          </button>
+          <button type="button" data-dom-id="no-lie" aria-pressed="false" class="rounded-full border border-border bg-card px-4 py-2 banban-text-body text-muted-foreground transition-colors hover:bg-muted hover:text-foreground">
+            撒谎成性
+          </button>
+          <button type="button" data-dom-id="no-control" aria-pressed="false" class="rounded-full border border-border bg-card px-4 py-2 banban-text-body text-muted-foreground transition-colors hover:bg-muted hover:text-foreground">
+            控制欲强
+          </button>
+          <button type="button" data-dom-id="no-addiction" aria-pressed="false" class="rounded-full border border-border bg-card px-4 py-2 banban-text-body text-muted-foreground transition-colors hover:bg-muted hover:text-foreground">
+            嗜酒嗜赌
+          </button>
+          <button type="button" data-dom-id="no-livingoff" aria-pressed="false" class="rounded-full border border-border bg-card px-4 py-2 banban-text-body text-muted-foreground transition-colors hover:bg-muted hover:text-foreground">
+            啃老
+          </button>
+          <button type="button" data-dom-id="no-petty" aria-pressed="false" class="rounded-full border border-border bg-card px-4 py-2 banban-text-body text-muted-foreground transition-colors hover:bg-muted hover:text-foreground">
+            斤斤计较
+          </button>
+        </div>
+        <p class="banban-text-caption text-muted-foreground pt-1">中性词</p>
+        <div class="flex flex-wrap gap-2">
+          <button type="button" data-dom-id="no-pet" aria-pressed="false" class="rounded-full border border-border bg-card px-4 py-2 banban-text-body text-muted-foreground transition-colors hover:bg-muted hover:text-foreground">
+            养宠
+          </button>
+          <button type="button" data-dom-id="no-smoke" aria-pressed="false" class="rounded-full border border-border bg-card px-4 py-2 banban-text-body text-muted-foreground transition-colors hover:bg-muted hover:text-foreground">
+            吸烟
+          </button>
+          <button type="button" data-dom-id="no-drink" aria-pressed="false" class="rounded-full border border-border bg-card px-4 py-2 banban-text-body text-muted-foreground transition-colors hover:bg-muted hover:text-foreground">
+            饮酒
+          </button>
+          <button type="button" data-dom-id="no-liveparent" aria-pressed="false" class="rounded-full border border-border bg-card px-4 py-2 banban-text-body text-muted-foreground transition-colors hover:bg-muted hover:text-foreground">
+            与父母同住
+          </button>
+          <button type="button" data-dom-id="no-distance" aria-pressed="false" class="rounded-full border border-border bg-card px-4 py-2 banban-text-body text-muted-foreground transition-colors hover:bg-muted hover:text-foreground">
+            异地恋
+          </button>
+          <button type="button" data-dom-id="no-workaholic" aria-pressed="false" class="rounded-full border border-border bg-card px-4 py-2 banban-text-body text-muted-foreground transition-colors hover:bg-muted hover:text-foreground">
+            工作狂
+          </button>
+        </div>
+      </div>
+
+      <div class="space-y-1.5">
+        <label for="input-intent-city" class="banban-text-label text-foreground">意向城市</label>
+        <div class="relative">
+          <i data-lucide="map-pin" class="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground"></i>
+          <input id="input-intent-city" data-dom-id="input-intent-city" type="text" placeholder="请输入意向生活城市" class="banban-text-body-large w-full rounded-lg border border-border bg-input py-3 pl-10 pr-4 text-foreground placeholder:text-muted-foreground focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/30" >
+        </div>
+      </div>
+    </form>
+  </main>
+
+  <!-- Bottom fixed action area -->
+  <div class="fixed bottom-0 left-0 right-0 z-10 border-t border-border bg-card pb-safe shadow-[var(--banban-shadow-2)]">
+    <div class="mx-auto flex w-full max-w-md items-center justify-between px-6 py-4">
+      <div class="flex items-center gap-2" aria-label="步骤指示">
+        <span class="h-2 w-2 rounded-full bg-muted"></span>
+        <span class="h-2 w-2 rounded-full bg-muted"></span>
+        <span class="h-2 w-2 rounded-full bg-primary"></span>
+        <span class="h-2 w-2 rounded-full bg-muted"></span>
+      </div>
+      <div class="flex items-center gap-3">
+        <button type="button" data-dom-id="btn-prev" class="inline-flex items-center justify-center gap-1 rounded-full border border-border bg-background px-5 py-3 banban-text-body-large font-medium text-foreground transition-colors active:bg-muted focus:outline-none focus:ring-2 focus:ring-ring/40">
+          <i data-lucide="chevron-left" class="h-5 w-5"></i>
+          上一步
+        </button>
+        <button type="button" data-dom-id="btn-next" class="inline-flex items-center justify-center gap-2 rounded-full bg-primary px-7 py-3 banban-text-body-large font-medium text-primary-foreground transition-colors active:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-ring/40">
+          下一步
+          <i data-lucide="chevron-right" class="h-5 w-5"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 搭伴对象说明浮窗 -->
+  <div data-dom-id="help-overlay" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/60 p-4 backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="help-panel-title">
+    <div data-dom-id="help-panel" class="w-full max-w-md space-y-4 rounded-xl border border-border bg-popover p-5 text-popover-foreground shadow-[var(--banban-shadow-3)]">
+      <div class="space-y-0.5">
+        <h2 id="help-panel-title" class="banban-text-h2 text-foreground">搭伴对象说明</h2>
+        <p class="banban-text-caption text-muted-foreground">选择你期望的搭伴关系类型，双方默认按此理解彼此的边界</p>
+      </div>
+      <ul class="space-y-3">
+        <li class="space-y-0.5 rounded-lg border border-border bg-background p-3">
+          <p class="banban-text-body font-medium text-foreground">异性</p>
+          <p class="banban-text-caption text-muted-foreground">与异性结伴参加活动或互相陪伴，不含恋爱目的，双方需提前明确边界。</p>
+        </li>
+        <li class="space-y-0.5 rounded-lg border border-border bg-background p-3">
+          <p class="banban-text-body font-medium text-foreground">同性</p>
+          <p class="banban-text-caption text-muted-foreground">与同性结伴出行或参加活动，兴趣与作息更容易一致，相处更放松。</p>
+        </li>
+        <li class="space-y-0.5 rounded-lg border border-border bg-background p-3">
+          <p class="banban-text-body font-medium text-foreground">不限</p>
+          <p class="banban-text-caption text-muted-foreground">不限定搭伴对象的性别与关系形式，更看重兴趣匹配与相处舒适度。</p>
+        </li>
+      </ul>
+      <button type="button" data-dom-id="btn-seek-help-close" class="w-full rounded-full bg-primary py-2.5 banban-text-body font-medium text-primary-foreground transition-colors active:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-ring/40">
+        知道了
+      </button>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      lucide.createIcons();
+
+      // Segmented control toggle (single-select per group)
+      const groups = ['live', 'finance', 'child', 'social', 'parent', 'wealth', 'status', 'seek', 'direction'];
+      groups.forEach(function (prefix) {
+        const btns = document.querySelectorAll('[data-dom-id^="' + prefix + '-"]');
+        btns.forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            btns.forEach(function (b) {
+              b.setAttribute('aria-pressed', 'false');
+              b.classList.remove('bg-primary', 'text-primary-foreground');
+              b.classList.add('text-muted-foreground', 'hover:bg-muted', 'hover:text-foreground');
+            });
+            btn.setAttribute('aria-pressed', 'true');
+            btn.classList.remove('text-muted-foreground', 'hover:bg-muted', 'hover:text-foreground');
+            btn.classList.add('bg-primary', 'text-primary-foreground');
+          });
+        });
+      });
+
+      // Cannot-accept (dealbreaker) multi-select toggle
+      const noBtns = document.querySelectorAll('[data-dom-id^="no-"]');
+      noBtns.forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          const pressed = btn.getAttribute('aria-pressed') === 'true';
+          if (pressed) {
+            btn.setAttribute('aria-pressed', 'false');
+            btn.classList.remove('bg-primary', 'text-primary-foreground');
+            btn.classList.add('bg-card', 'text-muted-foreground', 'hover:bg-muted', 'hover:text-foreground');
+          } else {
+            btn.setAttribute('aria-pressed', 'true');
+            btn.classList.remove('bg-card', 'text-muted-foreground', 'hover:bg-muted', 'hover:text-foreground');
+            btn.classList.add('bg-primary', 'text-primary-foreground');
+          }
+        });
+      });
+
+      // 搭伴对象说明浮窗 open/close
+      const seekHelpOverlay = document.querySelector('[data-dom-id="help-overlay"]');
+      const btnSeekHelp = document.querySelector('[data-dom-id="btn-seek-help"]');
+      const btnSeekHelpClose = document.querySelector('[data-dom-id="btn-seek-help-close"]');
+
+      function openSeekHelp() {
+        seekHelpOverlay.classList.remove('hidden');
+        seekHelpOverlay.classList.add('flex');
+      }
+
+      function closeSeekHelp() {
+        seekHelpOverlay.classList.add('hidden');
+        seekHelpOverlay.classList.remove('flex');
+      }
+
+      btnSeekHelp.addEventListener('click', openSeekHelp);
+      btnSeekHelpClose.addEventListener('click', closeSeekHelp);
+      seekHelpOverlay.addEventListener('click', function (e) {
+        if (e.target === seekHelpOverlay) {
+          closeSeekHelp();
+        }
+      });
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && !seekHelpOverlay.classList.contains('hidden')) {
+          closeSeekHelp();
+        }
+      });
+    })();
+  </script>
+</body>
+</html>

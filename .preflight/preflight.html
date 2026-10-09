@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Preflight</title>
+    <style id="theme-vars">
+  1→/* BanBan Design Tokens — 不婚者异性搭伴生活中介平台 */
+  2→
+  3→:root {
+  4→  /* Brand primary — Sage */
+  5→  --banban-primary-50: #f4f8f6;
+  6→  --banban-primary-100: #e3ece8;
+  7→  --banban-primary-200: #c7d9d1;
+  8→  --banban-primary-300: #a3bfb3;
+  9→  --banban-primary-400: #7a9f8f;
+ 10→  --banban-primary-500: #6b8e7d;
+ 11→  --banban-primary-600: #557365;
+ 12→  --banban-primary-700: #465c52;
+ 13→  --banban-primary-800: #3a4b43;
+ 14→  --banban-primary-900: #313f39;
+ 15→  --banban-primary-950: #18221e;
+ 16→
+ 17→  /* Neutral scale */
+ 18→  --banban-neutral-0: #ffffff;
+ 19→  --banban-neutral-50: #faf9f6;
+ 20→  --banban-neutral-100: #f2f1ef;
+ 21→  --banban-neutral-200: #e8e7e4;
+ 22→  --banban-neutral-300: #d6d4d0;
+ 23→  --banban-neutral-400: #a8a6a1;
+ 24→  --banban-neutral-500: #8a8883;
+ 25→  --banban-neutral-600: #6b6b6b;
+ 26→  --banban-neutral-700: #4f4f4f;
+ 27→  --banban-neutral-800: #2c2c2c;
+ 28→  --banban-neutral-900: #1a1a1a;
+ 29→  --banban-neutral-950: #0f0f12;
+ 30→
+ 31→  /* Semantic states */
+ 32→  --banban-success: #4caf50;
+ 33→  --banban-success-foreground: #ffffff;
+ 34→  --banban-success-subtle: #e8f5e9;
+ 35→  --banban-warning: #f5a623;
+ 36→  --banban-warning-foreground: #1a1a1a;
+ 37→  --banban-warning-subtle: #fff5e0;
+ 38→  --banban-error: #e53935;
+ 39→  --banban-error-foreground: #ffffff;
+ 40→  --banban-error-subtle: #fde8e8;
+ 41→  --banban-info: #3b82f6;
+ 42→  --banban-info-foreground: #ffffff;
+ 43→  --banban-info-subtle: #e8f0fe;
+ 44→
+ 45→  /* Semantic aliases — light mode */
+ 46→  --banban-background: var(--banban-neutral-50);
+ 47→  --banban-foreground: var(--banban-neutral-800);
+ 48→  --banban-card: var(--banban-neutral-0);
+ 49→  --banban-card-foreground: var(--banban-neutral-800);
+ 50→  --banban-popover: var(--banban-neutral-0);
+ 51→  --banban-popover-foreground: var(--banban-neutral-800);
+ 52→  --banban-primary: var(--banban-primary-500);
+ 53→  --banban-primary-foreground: var(--banban-neutral-0);
+ 54→  --banban-muted: var(--banban-neutral-100);
+ 55→  --banban-muted-foreground: var(--banban-neutral-600);
+ 56→  --banban-border: var(--banban-neutral-200);
+ 57→  --banban-input: var(--banban-neutral-0);
+ 58→  --banban-ring: var(--banban-primary-500);
+ 59→
+ 60→  /* Radius scale */
+ 61→  --banban-radius-small: 4px;
+ 62→  --banban-radius-medium: 8px;
+ 63→  --banban-radius-large: 12px;
+ 64→  --banban-radius-full: 9999px;
+ 65→
+ 66→  /* Shadows — static surfaces alpha <= 0.05; floating layers may be deeper */
+ 67→  --banban-shadow-1: 0 1px 2px rgba(15, 23, 42, 0.04), 0 1px 1px rgba(15, 23, 42, 0.02);
+ 68→  --banban-shadow-2: 0 8px 24px -8px rgba(15, 23, 42, 0.14);
+ 69→  --banban-shadow-3: 0 24px 60px -20px rgba(15, 23, 42, 0.24);
+ 70→
+ 71→  /* Typography */
+ 72→  --banban-font-sans: -apple-system, BlinkMacSystemFont, "SF Pro", "PingFang SC", "Noto Sans SC", "Microsoft YaHei", system-ui, sans-serif;
+ 73→  --banban-font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+ 74→
+ 75→  /* iOS safe areas */
+ 76→  --banban-safe-top: env(safe-area-inset-top, 0px);
+ 77→  --banban-safe-bottom: env(safe-area-inset-bottom, 0px);
+ 78→  --banban-safe-left: env(safe-area-inset-left, 0px);
+ 79→  --banban-safe-right: env(safe-area-inset-right, 0px);
+ 80→}
+ 81→
+ 82→.dark {
+ 83→  --banban-background: var(--banban-neutral-950);
+ 84→  --banban-foreground: var(--banban-neutral-100);
+ 85→  --banban-card: var(--banban-neutral-900);
+ 86→  --banban-card-foreground: var(--banban-neutral-100);
+ 87→  --banban-popover: var(--banban-neutral-900);
+ 88→  --banban-popover-foreground: var(--banban-neutral-100);
+ 89→  --banban-primary: var(--banban-primary-400);
+ 90→  --banban-primary-foreground: var(--banban-neutral-950);
+ 91→  --banban-muted: var(--banban-neutral-800);
+ 92→  --banban-muted-foreground: var(--banban-neutral-400);
+ 93→  --banban-border: #2f2f35;
+ 94→  --banban-input: var(--banban-neutral-900);
+ 95→  --banban-ring: var(--banban-primary-400);
+ 96→  --banban-shadow-1: 0 1px 2px rgba(0, 0, 0, 0.2);
+ 97→  --banban-shadow-2: 0 8px 24px -8px rgba(0, 0, 0, 0.4);
+ 98→  --banban-shadow-3: 0 24px 60px -20px rgba(0, 0, 0, 0.5);
+ 99→}
+100→
+101→/* Base typography classes */
+102→.banban-text-display {
+103→  font-family: var(--banban-font-sans);
+104→  font-size: clamp(32px, 8vw, 48px);
+105→  font-weight: 600;
+106→  line-height: 1.1;
+107→  letter-spacing: -0.02em;
+108→}
+109→
+110→.banban-text-h1 {
+111→  font-family: var(--banban-font-sans);
+112→  font-size: clamp(24px, 6vw, 32px);
+113→  font-weight: 600;
+114→  line-height: 1.2;
+115→  letter-spacing: -0.015em;
+116→}
+117→
+118→.banban-text-h2 {
+119→  font-family: var(--banban-font-sans);
+120→  font-size: 20px;
+121→  font-weight: 600;
+122→  line-height: 1.3;
+123→}
+124→
+125→.banban-text-body {
+126→  font-family: var(--banban-font-sans);
+127→  font-size: 15px;
+128→  font-weight: 400;
+129→  line-height: 1.6;
+130→}
+131→
+132→.banban-text-body-large {
+133→  font-family: var(--banban-font-sans);
+134→  font-size: 17px;
+135→  font-weight: 400;
+136→  line-height: 1.55;
+137→}
+138→
+139→.banban-text-caption {
+140→  font-family: var(--banban-font-sans);
+141→  font-size: 13px;
+142→  font-weight: 400;
+143→  line-height: 1.5;
+144→}
+145→
+146→.banban-text-label {
+147→  font-family: var(--banban-font-sans);
+148→  font-size: 13px;
+149→  font-weight: 500;
+150→  line-height: 1.4;
+151→}
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.3.1/dist/index.global.js"></script>
+    <script src="https://unpkg.com/lucide@1.8.0/dist/umd/lucide.min.js"></script>
+    <style type="text/tailwindcss">
+  @theme inline {
+    --color-background: var(--banban-background);
+    --color-foreground: var(--banban-foreground);
+    --color-card: var(--banban-card);
+    --color-card-foreground: var(--banban-card-foreground);
+    --color-popover: var(--banban-popover);
+    --color-popover-foreground: var(--banban-popover-foreground);
+    --color-primary: var(--banban-primary);
+    --color-primary-foreground: var(--banban-primary-foreground);
+    --color-muted: var(--banban-muted);
+    --color-muted-foreground: var(--banban-muted-foreground);
+    --color-border: var(--banban-border);
+    --color-input: var(--banban-input);
+    --color-ring: var(--banban-ring);
+    --radius-sm: var(--banban-radius-small);
+    --radius-md: var(--banban-radius-medium);
+    --radius-lg: var(--banban-radius-large);
+  }
+  @layer base {
+    body { background: var(--banban-background); color: var(--banban-foreground); }
+    td, th { @apply break-words; word-break: break-all; word-break: auto-phrase; }
+    th { @apply whitespace-nowrap; }
+  }
+    </style>
+    <style id="semantic-token-fallback">
+      .bg-background { background-color: var(--banban-background); }
+      .text-background { color: var(--banban-background); }
+      .border-background { border-color: var(--banban-background); }
+      .ring-background { --tw-ring-color: var(--banban-background); }
+      .bg-foreground { background-color: var(--banban-foreground); }
+      .text-foreground { color: var(--banban-foreground); }
+      .border-foreground { border-color: var(--banban-foreground); }
+      .ring-foreground { --tw-ring-color: var(--banban-foreground); }
+      .bg-card { background-color: var(--banban-card); }
+      .text-card { color: var(--banban-card); }
+      .border-card { border-color: var(--banban-card); }
+      .ring-card { --tw-ring-color: var(--banban-card); }
+      .bg-card-foreground { background-color: var(--banban-card-foreground); }
+      .text-card-foreground { color: var(--banban-card-foreground); }
+      .border-card-foreground { border-color: var(--banban-card-foreground); }
+      .ring-card-foreground { --tw-ring-color: var(--banban-card-foreground); }
+      .bg-popover { background-color: var(--banban-popover); }
+      .text-popover { color: var(--banban-popover); }
+      .border-popover { border-color: var(--banban-popover); }
+      .ring-popover { --tw-ring-color: var(--banban-popover); }
+      .bg-popover-foreground { background-color: var(--banban-popover-foreground); }
+      .text-popover-foreground { color: var(--banban-popover-foreground); }
+      .border-popover-foreground { border-color: var(--banban-popover-foreground); }
+      .ring-popover-foreground { --tw-ring-color: var(--banban-popover-foreground); }
+      .bg-primary { background-color: var(--banban-primary); }
+      .text-primary { color: var(--banban-primary); }
+      .border-primary { border-color: var(--banban-primary); }
+      .ring-primary { --tw-ring-color: var(--banban-primary); }
+      .bg-primary-foreground { background-color: var(--banban-primary-foreground); }
+      .text-primary-foreground { color: var(--banban-primary-foreground); }
+      .border-primary-foreground { border-color: var(--banban-primary-foreground); }
+      .ring-primary-foreground { --tw-ring-color: var(--banban-primary-foreground); }
+      .bg-muted { background-color: var(--banban-muted); }
+      .text-muted { color: var(--banban-muted); }
+      .border-muted { border-color: var(--banban-muted); }
+      .ring-muted { --tw-ring-color: var(--banban-muted); }
+      .bg-muted-foreground { background-color: var(--banban-muted-foreground); }
+      .text-muted-foreground { color: var(--banban-muted-foreground); }
+      .border-muted-foreground { border-color: var(--banban-muted-foreground); }
+      .ring-muted-foreground { --tw-ring-color: var(--banban-muted-foreground); }
+      .bg-border { background-color: var(--banban-border); }
+      .text-border { color: var(--banban-border); }
+      .border-border { border-color: var(--banban-border); }
+      .ring-border { --tw-ring-color: var(--banban-border); }
+      .bg-input { background-color: var(--banban-input); }
+      .text-input { color: var(--banban-input); }
+      .border-input { border-color: var(--banban-input); }
+      .ring-input { --tw-ring-color: var(--banban-input); }
+      .bg-ring { background-color: var(--banban-ring); }
+      .text-ring { color: var(--banban-ring); }
+      .border-ring { border-color: var(--banban-ring); }
+      .ring-ring { --tw-ring-color: var(--banban-ring); }
+    </style>
+    <style>
+      .no-scrollbar::-webkit-scrollbar { display: none; }
+      .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+      [data-icon] {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        -webkit-mask-size: contain;
+        mask-size: contain;
+        -webkit-mask-repeat: no-repeat;
+        mask-repeat: no-repeat;
+        -webkit-mask-position: center;
+        mask-position: center;
+        background-color: currentColor;
+      }
+    </style>
+</head>
+<body class="min-h-screen font-sans antialiased">
+    <main>
+    </main>
+    <script>lucide.createIcons();</script>
+</body>
+</html>

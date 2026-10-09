@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#000000">
+    <title>他人资料</title>
+    <style id="theme-vars">
+/* BanBan Design Tokens — 不婚者异性搭伴生活中介平台 */
+
+:root {
+  /* Brand primary — Apple System Blue */
+  --banban-primary-50: #e8f2ff;
+  --banban-primary-100: #cfe5ff;
+  --banban-primary-200: #9fcbff;
+  --banban-primary-300: #66abff;
+  --banban-primary-400: #2e8dff;
+  --banban-primary-500: #007aff;
+  --banban-primary-600: #0064d6;
+  --banban-primary-700: #004fad;
+  --banban-primary-800: #003b82;
+  --banban-primary-900: #00275a;
+  --banban-primary-950: #001c40;
+
+  /* Neutral scale — iOS system grays */
+  --banban-neutral-0: #ffffff;
+  --banban-neutral-50: #f7f7fa;
+  --banban-neutral-100: #f2f2f7;
+  --banban-neutral-200: #e5e5ea;
+  --banban-neutral-300: #d1d1d6;
+  --banban-neutral-400: #aeaeb2;
+  --banban-neutral-500: #8e8e93;
+  --banban-neutral-600: #6e6e73;
+  --banban-neutral-700: #48484a;
+  --banban-neutral-800: #2c2c2e;
+  --banban-neutral-900: #1d1d1f;
+  --banban-neutral-950: #0a0a0c;
+
+  /* Semantic states — Apple system colors */
+  --banban-success: #34c759;
+  --banban-success-foreground: #ffffff;
+  --banban-success-subtle: #e9f9ee;
+  --banban-warning: #ff9500;
+  --banban-warning-foreground: #1d1d1f;
+  --banban-warning-subtle: #fff2e0;
+  --banban-error: #ff3b30;
+  --banban-error-foreground: #ffffff;
+  --banban-error-subtle: #ffecea;
+  --banban-info: #007aff;
+  --banban-info-foreground: #ffffff;
+  --banban-info-subtle: #e8f2ff;
+
+  /* Semantic aliases — light mode */
+  --banban-background: var(--banban-neutral-0);
+  --banban-foreground: var(--banban-neutral-900);
+  --banban-card: var(--banban-neutral-0);
+  --banban-card-foreground: var(--banban-neutral-900);
+  --banban-popover: var(--banban-neutral-0);
+  --banban-popover-foreground: var(--banban-neutral-900);
+  --banban-primary: var(--banban-primary-500);
+  --banban-primary-foreground: var(--banban-neutral-0);
+  --banban-muted: var(--banban-neutral-100);
+  --banban-muted-foreground: var(--banban-neutral-500);
+  --banban-border: var(--banban-neutral-200);
+  --banban-input: var(--banban-neutral-300);
+  --banban-ring: var(--banban-primary-500);
+
+  /* Radius scale */
+  --banban-radius-small: 4px;
+  --banban-radius-medium: 8px;
+  --banban-radius-large: 12px;
+  --banban-radius-full: 9999px;
+
+  /* Shadows — Apple hairline elevations (light); floating layers may be deeper */
+  --banban-shadow-1: 0 1px 2px rgba(0, 0, 0, 0.04), 0 1px 1px rgba(0, 0, 0, 0.03);
+  --banban-shadow-2: 0 8px 24px -8px rgba(0, 0, 0, 0.08), 0 4px 8px -4px rgba(0, 0, 0, 0.05);
+  --banban-shadow-3: 0 24px 64px -12px rgba(0, 0, 0, 0.12);
+
+  /* Typography */
+  --banban-font-sans: -apple-system, BlinkMacSystemFont, "SF Pro", "PingFang SC", "Noto Sans SC", "Microsoft YaHei", system-ui, sans-serif;
+  --banban-font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
+  /* iOS safe areas */
+  --banban-safe-top: env(safe-area-inset-top, 0px);
+  --banban-safe-bottom: env(safe-area-inset-bottom, 0px);
+  --banban-safe-left: env(safe-area-inset-left, 0px);
+  --banban-safe-right: env(safe-area-inset-right, 0px);
+}
+
+/* Dark mode — Apple system dark (default appearance) */
+.dark {
+  --banban-background: #000000;
+  --banban-foreground: #f5f5f7;
+  --banban-card: #1c1c1e;
+  --banban-card-foreground: #f5f5f7;
+  --banban-popover: #3a3a3c;
+  --banban-popover-foreground: #f5f5f7;
+  --banban-primary: var(--banban-primary-400);
+  --banban-primary-foreground: #000000;
+  --banban-muted: #1c1c1e;
+  --banban-muted-foreground: #8e8e93;
+  --banban-border: #3a3a3c;
+  --banban-input: #3a3a3c;
+  --banban-ring: var(--banban-primary-400);
+
+  /* Status subtle backgrounds — dark-tuned tints (Apple system hues) */
+  --banban-success-subtle: #142e1f;
+  --banban-warning-subtle: #33230e;
+  --banban-error-subtle: #331513;
+  --banban-info-subtle: #0f2338;
+
+  /* Elevated shadows for dark surfaces — Apple dark elevations */
+  --banban-shadow-1: 0 1px 2px rgba(0, 0, 0, 0.30);
+  --banban-shadow-2: 0 8px 24px -8px rgba(0, 0, 0, 0.50), 0 4px 8px -4px rgba(0, 0, 0, 0.40);
+  --banban-shadow-3: 0 24px 64px -12px rgba(0, 0, 0, 0.60);
+}
+
+/* Base typography classes */
+.banban-text-display {
+  font-family: var(--banban-font-sans);
+  font-size: clamp(32px, 8vw, 48px);
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+.banban-text-h1 {
+  font-family: var(--banban-font-sans);
+  font-size: clamp(24px, 6vw, 32px);
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.015em;
+}
+
+.banban-text-h2 {
+  font-family: var(--banban-font-sans);
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.banban-text-body {
+  font-family: var(--banban-font-sans);
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1.6;
+}
+
+.banban-text-body-large {
+  font-family: var(--banban-font-sans);
+  font-size: 17px;
+  font-weight: 400;
+  line-height: 1.55;
+}
+
+.banban-text-caption {
+  font-family: var(--banban-font-sans);
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.5;
+}
+
+.banban-text-label {
+  font-family: var(--banban-font-sans);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.4;
+}
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.3.1/dist/index.global.js"></script>
+    <script src="https://unpkg.com/lucide@1.8.0/dist/umd/lucide.min.js"></script>
+    <style type="text/tailwindcss">
+  @theme inline {
+    --color-background: var(--banban-background);
+    --color-foreground: var(--banban-foreground);
+    --color-card: var(--banban-card);
+    --color-card-foreground: var(--banban-card-foreground);
+    --color-popover: var(--banban-popover);
+    --color-popover-foreground: var(--banban-popover-foreground);
+    --color-primary: var(--banban-primary);
+    --color-primary-foreground: var(--banban-primary-foreground);
+    --color-muted: var(--banban-muted);
+    --color-muted-foreground: var(--banban-muted-foreground);
+    --color-border: var(--banban-border);
+    --color-input: var(--banban-input);
+    --color-ring: var(--banban-ring);
+    --radius-sm: var(--banban-radius-small);
+    --radius-md: var(--banban-radius-medium);
+    --radius-lg: var(--banban-radius-large);
+  }
+  @layer base {
+    body { background: var(--banban-background); color: var(--banban-foreground); }
+    td, th { @apply break-words; word-break: break-all; word-break: auto-phrase; }
+    th { @apply whitespace-nowrap; }
+  }
+    </style>
+    <style id="semantic-token-fallback">
+      .bg-background { background-color: var(--banban-background); }
+      .text-background { color: var(--banban-background); }
+      .border-background { border-color: var(--banban-background); }
+      .ring-background { --tw-ring-color: var(--banban-background); }
+      .bg-foreground { background-color: var(--banban-foreground); }
+      .text-foreground { color: var(--banban-foreground); }
+      .border-foreground { border-color: var(--banban-foreground); }
+      .ring-foreground { --tw-ring-color: var(--banban-foreground); }
+      .bg-card { background-color: var(--banban-card); }
+      .text-card { color: var(--banban-card); }
+      .border-card { border-color: var(--banban-card); }
+      .ring-card { --tw-ring-color: var(--banban-card); }
+      .bg-card-foreground { background-color: var(--banban-card-foreground); }
+      .text-card-foreground { color: var(--banban-card-foreground); }
+      .border-card-foreground { border-color: var(--banban-card-foreground); }
+      .ring-card-foreground { --tw-ring-color: var(--banban-card-foreground); }
+      .bg-popover { background-color: var(--banban-popover); }
+      .text-popover { color: var(--banban-popover); }
+      .border-popover { border-color: var(--banban-popover); }
+      .ring-popover { --tw-ring-color: var(--banban-popover); }
+      .bg-popover-foreground { background-color: var(--banban-popover-foreground); }
+      .text-popover-foreground { color: var(--banban-popover-foreground); }
+      .border-popover-foreground { border-color: var(--banban-popover-foreground); }
+      .ring-popover-foreground { --tw-ring-color: var(--banban-popover-foreground); }
+      .bg-primary { background-color: var(--banban-primary); }
+      .text-primary { color: var(--banban-primary); }
+      .border-primary { border-color: var(--banban-primary); }
+      .ring-primary { --tw-ring-color: var(--banban-primary); }
+      .bg-primary-foreground { background-color: var(--banban-primary-foreground); }
+      .text-primary-foreground { color: var(--banban-primary-foreground); }
+      .border-primary-foreground { border-color: var(--banban-primary-foreground); }
+      .ring-primary-foreground { --tw-ring-color: var(--banban-primary-foreground); }
+      .bg-muted { background-color: var(--banban-muted); }
+      .text-muted { color: var(--banban-muted); }
+      .border-muted { border-color: var(--banban-muted); }
+      .ring-muted { --tw-ring-color: var(--banban-muted); }
+      .bg-muted-foreground { background-color: var(--banban-muted-foreground); }
+      .text-muted-foreground { color: var(--banban-muted-foreground); }
+      .border-muted-foreground { border-color: var(--banban-muted-foreground); }
+      .ring-muted-foreground { --tw-ring-color: var(--banban-muted-foreground); }
+      .bg-border { background-color: var(--banban-border); }
+      .text-border { color: var(--banban-border); }
+      .border-border { border-color: var(--banban-border); }
+      .ring-border { --tw-ring-color: var(--banban-border); }
+      .bg-input { background-color: var(--banban-input); }
+      .text-input { color: var(--banban-input); }
+      .border-input { border-color: var(--banban-input); }
+      .ring-input { --tw-ring-color: var(--banban-input); }
+      .bg-ring { background-color: var(--banban-ring); }
+      .text-ring { color: var(--banban-ring); }
+      .border-ring { border-color: var(--banban-ring); }
+      .ring-ring { --tw-ring-color: var(--banban-ring); }
+    </style>
+    <style>
+      .no-scrollbar::-webkit-scrollbar { display: none; }
+      .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+      [data-icon] {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        -webkit-mask-size: contain;
+        mask-size: contain;
+        -webkit-mask-repeat: no-repeat;
+        mask-repeat: no-repeat;
+        -webkit-mask-position: center;
+        mask-position: center;
+        background-color: currentColor;
+      }
+    </style>
+</head>
+<body class="min-h-screen font-sans antialiased" style="padding-top: var(--banban-safe-top); padding-bottom: var(--banban-safe-bottom);">
+    <main class="pb-28">
+        <!-- 顶部导航 -->
+        <header class="sticky top-0 z-20 flex items-center justify-between px-4 py-3 bg-background/90 backdrop-blur-md">
+            <button data-dom-id="btn-back" class="flex items-center justify-center w-10 h-10 rounded-full bg-card text-foreground shadow-sm border border-border">
+                <i data-lucide="chevron-left" class="w-5 h-5"></i>
+            </button>
+            <button data-dom-id="btn-more" class="flex items-center justify-center w-10 h-10 rounded-full bg-card text-foreground shadow-sm border border-border">
+                <i data-lucide="more-horizontal" class="w-5 h-5"></i>
+            </button>
+        </header>
+
+        <!-- 头像区 -->
+        <section class="px-5 pt-4 pb-6 text-center">
+            <button data-dom-id="avatar-user" class="relative mx-auto mb-4">
+                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Anran&backgroundColor=1c1c1e" alt="安然头像" class="w-28 h-28 rounded-full object-cover border-4 border-card shadow-2">
+                <span class="absolute bottom-1 right-1 flex items-center justify-center w-7 h-7 rounded-full bg-primary text-primary-foreground border-2 border-card">
+                    <i data-lucide="badge-check" class="w-4 h-4"></i>
+                </span>
+            </button>
+            <div class="flex items-center justify-center gap-2 mb-2">
+                <h1 class="banban-text-h1 text-foreground">安然</h1>
+                <i data-lucide="badge-check" class="w-5 h-5 text-primary"></i>
+            </div>
+            <div class="flex items-center justify-center gap-3 banban-text-body text-muted-foreground">
+                <span class="flex items-center gap-1">
+                    <i data-lucide="map-pin" class="w-4 h-4"></i>
+                    杭州
+                </span>
+                <span class="w-1 h-1 rounded-full bg-muted-foreground"></span>
+                <span>34 岁</span>
+                <span class="w-1 h-1 rounded-full bg-muted-foreground"></span>
+                <span>图书编辑</span>
+            </div>
+        </section>
+
+        <!-- 资料卡片 -->
+        <div class="px-4 space-y-4">
+            <!-- 搭伴意向 -->
+            <section class="rounded-2xl bg-card p-5 shadow-1 border border-border">
+                <h2 class="banban-text-h2 text-foreground mb-4 flex items-center gap-2">
+                    <i data-lucide="heart-handshake" class="w-5 h-5 text-primary"></i>
+                    搭伴意向
+                </h2>
+                <div class="flex flex-wrap gap-2">
+                    <span class="inline-flex items-center px-3 py-1.5 rounded-full bg-primary/10 text-primary banban-text-label">协议搭伴</span>
+                    <span class="inline-flex items-center px-3 py-1.5 rounded-full bg-primary/10 text-primary banban-text-label">离异</span>
+                    <span class="inline-flex items-center px-3 py-1.5 rounded-full bg-primary/10 text-primary banban-text-label">同性</span>
+                    <span class="inline-flex items-center px-3 py-1.5 rounded-full bg-primary/10 text-primary banban-text-label">同居分房</span>
+                    <span class="inline-flex items-center px-3 py-1.5 rounded-full bg-primary/10 text-primary banban-text-label">AA</span>
+                    <span class="inline-flex items-center px-3 py-1.5 rounded-full bg-primary/10 text-primary banban-text-label">共同财富</span>
+                    <span class="inline-flex items-center px-3 py-1.5 rounded-full bg-primary/10 text-primary banban-text-label">否</span>
+                    <span class="inline-flex items-center px-3 py-1.5 rounded-full bg-primary/10 text-primary banban-text-label">接受宠物猫</span>
+                    <span class="inline-flex items-center px-3 py-1.5 rounded-full bg-primary/10 text-primary banban-text-label">保持独立社交</span>
+                    <span class="inline-flex items-center px-3 py-1.5 rounded-full bg-primary/10 text-primary banban-text-label">同城居住</span>
+                </div>
+                <div class="mt-4 pt-4 border-t border-border space-y-1">
+                    <p class="banban-text-caption text-muted-foreground">不能接受</p>
+                    <p class="banban-text-body text-card-foreground">冷暴力、花心</p>
+                </div>
+            </section>
+
+            <!-- 生活方式 -->
+            <section class="rounded-2xl bg-card p-5 shadow-1 border border-border">
+                <h2 class="banban-text-h2 text-foreground mb-4 flex items-center gap-2">
+                    <i data-lucide="coffee" class="w-5 h-5 text-primary"></i>
+                    生活方式
+                </h2>
+                <div class="grid grid-cols-3 gap-3">
+                    <div class="flex flex-col items-center gap-2 p-3 rounded-xl bg-muted">
+                        <i data-lucide="cigarette-off" class="w-6 h-6 text-muted-foreground"></i>
+                        <span class="banban-text-caption text-foreground">不吸烟</span>
+                    </div>
+                    <div class="flex flex-col items-center gap-2 p-3 rounded-xl bg-muted">
+                        <i data-lucide="wine" class="w-6 h-6 text-muted-foreground"></i>
+                        <span class="banban-text-caption text-foreground">偶尔饮酒</span>
+                    </div>
+                    <div class="flex flex-col items-center gap-2 p-3 rounded-xl bg-muted">
+                        <i data-lucide="moon" class="w-6 h-6 text-muted-foreground"></i>
+                        <span class="banban-text-caption text-foreground">早睡早起</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 关于我 -->
+            <section class="rounded-2xl bg-card p-5 shadow-1 border border-border">
+                <h2 class="banban-text-h2 text-foreground mb-3 flex items-center gap-2">
+                    <i data-lucide="user" class="w-5 h-5 text-primary"></i>
+                    关于我
+                </h2>
+                <p class="banban-text-body text-card-foreground leading-relaxed">
+                    性格偏安静，喜欢阅读和独立空间。期待一段平等、尊重边界的搭伴关系：可以一起吃饭、旅行，也尊重彼此的独处时间。养了一只橘猫，希望对方同样喜欢小动物。生活中注重沟通，遇到问题愿意面对面交流，而不是冷战或逃避。
+                </p>
+            </section>
+
+            <!-- 照片墙 -->
+            <section class="rounded-2xl bg-card p-5 shadow-1 border border-border">
+                <h2 class="banban-text-h2 text-foreground mb-4 flex items-center gap-2">
+                    <i data-lucide="images" class="w-5 h-5 text-primary"></i>
+                    照片墙
+                </h2>
+                <div class="grid grid-cols-3 gap-3">
+                    <button data-dom-id="photo-1" class="aspect-square rounded-xl overflow-hidden bg-muted">
+                        <img src="https://picsum.photos/seed/banban1/300/300" alt="照片 1" class="w-full h-full object-cover">
+                    </button>
+                    <button class="aspect-square rounded-xl overflow-hidden bg-muted">
+                        <img src="https://picsum.photos/seed/banban2/300/300" alt="照片 2" class="w-full h-full object-cover">
+                    </button>
+                    <button class="aspect-square rounded-xl overflow-hidden bg-muted">
+                        <img src="https://picsum.photos/seed/banban3/300/300" alt="照片 3" class="w-full h-full object-cover">
+                    </button>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- 底部固定操作栏 -->
+    <footer class="fixed bottom-0 left-0 right-0 z-30 px-5 py-4 bg-background/95 backdrop-blur-md border-t border-border" style="padding-bottom: calc(1rem + var(--banban-safe-bottom));">
+        <div class="flex items-center gap-3">
+            <button data-dom-id="btn-skip" class="flex-1 inline-flex items-center justify-center h-12 rounded-xl bg-card text-foreground font-medium border border-border shadow-sm banban-text-body-large">
+                跳过
+            </button>
+            <button data-dom-id="btn-like" class="flex-[1.6] inline-flex items-center justify-center gap-2 h-12 rounded-xl bg-primary text-primary-foreground font-semibold shadow-2 banban-text-body-large">
+                <i data-lucide="heart" class="w-5 h-5"></i>
+                喜欢
+            </button>
+        </div>
+    </footer>
+
+    <script>lucide.createIcons();</script>
+</body>
+</html>

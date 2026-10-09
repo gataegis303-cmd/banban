@@ -1,0 +1,115 @@
+{
+  "id": "root",
+  "type": "root",
+  "status": "generated",
+  "children": [
+    {
+      "id": "page-onboarding",
+      "type": "page",
+      "status": "generated",
+      "htmlSrc": "pages/onboarding.html"
+    },
+    {
+      "id": "page-login",
+      "type": "page",
+      "status": "generated",
+      "htmlSrc": "pages/login.html"
+    },
+    {
+      "id": "page-verify-id",
+      "type": "page",
+      "status": "generated",
+      "htmlSrc": "pages/verify-id.html"
+    },
+    {
+      "id": "page-permissions",
+      "type": "page",
+      "status": "generated",
+      "htmlSrc": "pages/permissions.html"
+    },
+    {
+      "id": "page-profile-wizard-1",
+      "type": "page",
+      "status": "generated",
+      "htmlSrc": "pages/profile-wizard-1.html"
+    },
+    {
+      "id": "page-profile-wizard-2",
+      "type": "page",
+      "status": "generated",
+      "htmlSrc": "pages/profile-wizard-2.html"
+    },
+    {
+      "id": "page-profile-wizard-3",
+      "type": "page",
+      "status": "generated",
+      "htmlSrc": "pages/profile-wizard-3.html"
+    },
+    {
+      "id": "page-profile-wizard-4",
+      "type": "page",
+      "status": "generated",
+      "htmlSrc": "pages/profile-wizard-4.html"
+    },
+    {
+      "id": "page-my-profile",
+      "type": "page",
+      "status": "generated",
+      "htmlSrc": "pages/my-profile.html"
+    },
+    {
+      "id": "page-home",
+      "type": "page",
+      "status": "generated",
+      "htmlSrc": "pages/home.html"
+    },
+    {
+      "id": "page-filter",
+      "type": "page",
+      "status": "generated",
+      "htmlSrc": "pages/filter.html"
+    },
+    {
+      "id": "page-profile-detail",
+      "type": "page",
+      "status": "generated",
+      "htmlSrc": "pages/profile-detail.html"
+    },
+    {
+      "id": "page-match-success",
+      "type": "page",
+      "status": "generated",
+      "htmlSrc": "pages/match-success.html"
+    },
+    {
+      "id": "page-messages",
+      "type": "page",
+      "status": "generated",
+      "htmlSrc": "pages/messages.html"
+    },
+    {
+      "id": "page-chat",
+      "type": "page",
+      "status": "generated",
+      "htmlSrc": "pages/chat.html"
+    },
+    {
+      "id": "page-safety",
+      "type": "page",
+      "status": "generated",
+      "htmlSrc": "pages/safety.html"
+    },
+    {
+      "id": "page-privacy",
+      "type": "page",
+      "status": "generated",
+      "htmlSrc": "pages/privacy.html"
+    },
+    {
+      "id": "page-settings",
+      "type": "page",
+      "status": "generated",
+      "htmlSrc": "pages/settings.html"
+    }
+  ]
+}
