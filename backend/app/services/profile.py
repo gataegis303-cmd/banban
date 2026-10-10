@@ -9,7 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.profile import Profile, UserPhoto
 from app.models.user import User
-from app.schemas.profile import ProfileOut, ProfileUpdate, PhotoOut
+from app.schemas.profile import PhotoOut, ProfileOut, ProfileUpdate
 
 PHOTO_LIMIT = 6  # 资料照片上限（与产品规格一致）
 

@@ -3,15 +3,17 @@
 
 import enum
 import uuid
-from datetime import date
+from datetime import date, datetime
 
 from sqlalchemy import (
     CheckConstraint,
     Date,
+    DateTime,
     Enum,
     Float,
     ForeignKey,
     UniqueConstraint,
+    func,
     text,
 )
 from sqlalchemy.orm import Mapped, mapped_column
@@ -92,4 +94,8 @@ class Match(UUIDPKMixin, Base):
     )
     user_b_id: Mapped[uuid.UUID] = mapped_column(
         ForeignKey("users.id", ondelete="CASCADE"), index=True, nullable=False,
+    )
+    # 匹配建立时间（列表按此倒序 + 游标分页）；无需 updated_at，不用 TimestampMixin
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False,
     )

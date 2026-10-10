@@ -132,7 +132,8 @@ async def upload_photo_content(
 async def delete_photo(order: int, user: CurrentUser, db: DBSession) -> PhotoOut:
     if not 0 <= order <= 5:
         raise HTTPException(
-            status.HTTP_422_UNPROCESSABLE_ENTITY, {"code": "invalid_order", "message": "展示位取值 0-5"}
+            status.HTTP_422_UNPROCESSABLE_ENTITY,
+            {"code": "invalid_order", "message": "展示位取值 0-5"},
         )
     photo = await db.scalar(
         select(UserPhoto).where(UserPhoto.user_id == user.id, UserPhoto.sort_order == order)
