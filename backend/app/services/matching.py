@@ -19,6 +19,7 @@ from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.models.chat import Conversation
 from app.models.matching import (
     Like,
     LikeDirection,
@@ -183,18 +184,25 @@ async def react(
             if existing is not None:
                 matched, match_id = True, existing.id
             else:
+                # 1 match 1 conversation：随匹配一并建立（唯一约束兜底并发）
                 match = Match(user_a_id=a_id, user_b_id=b_id)
+                conversation = Conversation(user_a_id=a_id, user_b_id=b_id)
                 try:
                     async with db.begin_nested():
                         db.add(match)
+                        await db.flush()  # 先取回 match.id（server 端生成）
+                        conversation.match_id = match.id
+                        db.add(conversation)
                         await db.flush()
                     matched, match_id = True, match.id
                 except IntegrityError:
-                    # 并发双向 like：对方请求已建 match；savepoint 已回滚，
-                    # 外层事务（likes 写入等）不受影响
+                    # 并发双向 like：对方请求已建 match；savepoint 已回滚
+                    # （match 与 conversation 一起），外层事务不受影响
                     existing = await db.scalar(
                         select(Match).where(Match.user_a_id == a_id, Match.user_b_id == b_id)
                     )
+                    if existing is None:
+                        raise
                     matched, match_id = True, existing.id
 
     await db.commit()

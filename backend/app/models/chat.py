@@ -14,6 +14,7 @@ from sqlalchemy import (
     String,
     Text,
     UniqueConstraint,
+    func,
     text,
 )
 from sqlalchemy.dialects.postgresql import JSONB
@@ -40,8 +41,9 @@ class ReportStatus(enum.Enum):
 class Conversation(UUIDPKMixin, TimestampMixin, Base):
     __tablename__ = "conversations"
 
+    # 1 match 1 conversation（唯一约束兜底，unmatch 时随 match 级联删除）
     match_id: Mapped[uuid.UUID] = mapped_column(
-        ForeignKey("matches.id", ondelete="CASCADE"), index=True, nullable=False,
+        ForeignKey("matches.id", ondelete="CASCADE"), index=True, unique=True, nullable=False,
     )
     user_a_id: Mapped[uuid.UUID] = mapped_column(
         ForeignKey("users.id", ondelete="CASCADE"), index=True, nullable=False,
@@ -74,6 +76,10 @@ class Message(UUIDPKMixin, Base):
         ForeignKey("users.id", ondelete="CASCADE"), nullable=False,
     )
     seq: Mapped[int] = mapped_column(BigInteger, nullable=False)
+    # 消息时间戳（服务端权威，iOS ChatMessage.timestamp 消费）
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False,
+    )
     type: Mapped[MessageType] = mapped_column(
         Enum(MessageType, name="message_type"),
         default=MessageType.text,

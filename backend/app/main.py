@@ -12,7 +12,7 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from app.adapters import oss
 from app.config import settings
-from app.routers import auth, health, matches, profile, recommendations
+from app.routers import auth, chat, health, matches, profile, recommendations
 
 
 @asynccontextmanager
@@ -73,6 +73,7 @@ app.include_router(auth.router, prefix="/api/v1")
 app.include_router(profile.router, prefix="/api/v1")
 app.include_router(recommendations.router, prefix="/api/v1")
 app.include_router(matches.router, prefix="/api/v1")
+app.include_router(chat.router, prefix="/api/v1")
 
 # 照片静态访问（开发环境本地落盘；生产由 OSS/CDN 替代）
 # check_dir=False：photos 目录在首次保存时才创建
