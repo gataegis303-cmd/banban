@@ -7,10 +7,12 @@ from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
+from app.adapters import oss
 from app.config import settings
-from app.routers import auth, health
+from app.routers import auth, health, profile
 
 
 @asynccontextmanager
@@ -68,3 +70,8 @@ async def unified_http_error_handler(request: Request, exc: StarletteHTTPExcepti
 
 app.include_router(health.router, prefix="/api/v1")
 app.include_router(auth.router, prefix="/api/v1")
+app.include_router(profile.router, prefix="/api/v1")
+
+# 照片静态访问（开发环境本地落盘；生产由 OSS/CDN 替代）
+# check_dir=False：photos 目录在首次保存时才创建
+app.mount("/static", StaticFiles(directory=oss.PHOTOS_DIR, check_dir=False))

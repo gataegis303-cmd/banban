@@ -10,3 +10,6 @@ xcuserdata/
 
 # Swift Package Manager
 .build/
+
+# 后端本地数据（照片 dev mock 存储）
+backend/data/
