@@ -116,8 +116,8 @@ struct CodeInputView: View {
                 // 新注册：栈替换为 login → verifyID，等同原型注册流（codeInput 完成使命出栈）
                 appState.authPath = [.login, .verifyID]
             } else {
-                // 老用户：直接进主流程（authPath 在 logout 时重置）
-                appState.phase = .main
+                // 老用户：进主流程并拉取服务端资料（authPath 在 logout 时重置）
+                appState.enterMainAfterLogin()
             }
         }
     }

@@ -8,7 +8,7 @@
 //     成功返回 true 供 APIClient 重放原请求；失败清空令牌，调用方回登录
 //
 //  并发竞态（多请求同时 401 触发多次 refresh）暂不处理：
-//  P2 单一登录链路无并发场景，P4 bootstrap 多路并发拉取时再收敛
+//  P2/P4 链路均为单路串行请求，无并发场景；P6/P9 接入推荐与会话后再收敛
 //
 
 import Foundation
@@ -58,16 +58,23 @@ struct AuthInterceptor {
 
     /// 不带鉴权头的原始请求（refresh 自身也走这里）
     func plainRequest(_ endpoint: Endpoint, baseURL: URL) throws -> URLRequest {
-        // 不用 URL(string:relativeTo:)：endpoint.path 以 / 开头会整体替换 base 路径（/api/v1 丢失）
-        let trimmedPath = endpoint.path.hasPrefix("/") ? String(endpoint.path.dropFirst()) : endpoint.path
-        guard let url = URL(string: baseURL.absoluteString + "/" + trimmedPath) else {
-            throw APIError.invalidURL
+        // absoluteURL 直传（OSS 预签名、已按 serverRootURL 解析的相对 upload_url），不再拼 baseURL
+        let url: URL
+        if let absoluteURL = endpoint.absoluteURL {
+            url = absoluteURL
+        } else {
+            // 不用 URL(string:relativeTo:)：endpoint.path 以 / 开头会整体替换 base 路径（/api/v1 丢失）
+            let trimmedPath = endpoint.path.hasPrefix("/") ? String(endpoint.path.dropFirst()) : endpoint.path
+            guard let composed = URL(string: baseURL.absoluteString + "/" + trimmedPath) else {
+                throw APIError.invalidURL
+            }
+            url = composed
         }
         var request = URLRequest(url: url)
         request.httpMethod = endpoint.method
         request.httpBody = endpoint.body
         if endpoint.body != nil {
-            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+            request.setValue(endpoint.contentType ?? "application/json", forHTTPHeaderField: "Content-Type")
         }
         request.setValue("application/json", forHTTPHeaderField: "Accept")
         return request

@@ -5,6 +5,7 @@
 //  async/await URLSession 封装：
 //  send(endpoint) = 组装请求 → 拦截器注入 Bearer → 执行
 //                   → 401 时 refresh 换新后重放一次 → 统一错误体解析
+//  sendVoid(endpoint) = 同链路、忽略响应体（照片二进制上传等空 body 200 端点）
 //
 
 import Foundation
@@ -31,8 +32,30 @@ final class APIClient {
 
     var tokens: KeychainTokenStore { tokenStore }
 
+    /// scheme://host:port（去掉 /api/v1 路径），用于解析后端返回的相对 upload_url
+    /// （dev 上传地址形如 /api/v1/me/photos/{id}/content，直接拼 baseURL 会双重前缀）
+    var serverRootURL: URL {
+        var components = URLComponents(url: baseURL, resolvingAgainstBaseURL: false)
+        components?.path = ""
+        return components?.url ?? baseURL
+    }
+
     /// 带鉴权流程的请求入口
     func send<T: Decodable>(_ endpoint: Endpoint) async throws -> T {
+        let (data, response) = try await performWithReplay(endpoint)
+        return try decode(data, response)
+    }
+
+    /// 期望空响应体（200）的请求，如照片二进制内容上传（PUT content 返回空 body）
+    func sendVoid(_ endpoint: Endpoint) async throws {
+        let (_, response) = try await performWithReplay(endpoint)
+        try assertSuccess(Data(), response)
+    }
+
+    // MARK: - 底层执行
+
+    /// 执行请求；requiresAuth 且收到 401 时 refresh 换新后重放一次
+    private func performWithReplay(_ endpoint: Endpoint) async throws -> (Data, URLResponse) {
         var request = try interceptor.authorize(endpoint, baseURL: baseURL)
         var (data, response) = try await perform(request)
 
@@ -44,8 +67,7 @@ final class APIClient {
             request = try interceptor.authorize(endpoint, baseURL: baseURL)
             (data, response) = try await perform(request)
         }
-
-        return try decode(data, response)
+        return (data, response)
     }
 
     // MARK: - 底层执行
@@ -65,17 +87,22 @@ final class APIClient {
     /// 2xx → 解码；非 2xx → 解析统一错误体 {"error": {"code","message"}} 抛 server
     /// （ErrorBody/Envelope 需文件级声明：类型不能嵌套在泛型函数里）
     private func decode<T: Decodable>(_ data: Data, _ response: URLResponse) throws -> T {
+        try assertSuccess(data, response)
+        do {
+            return try JSONDecoder.api.decode(T.self, from: data)
+        } catch {
+            throw APIError.decoding(underlying: error)
+        }
+    }
+
+    /// 非 2xx → 解析统一错误体 {"error": {"code","message"}} 抛 server
+    private func assertSuccess(_ data: Data, _ response: URLResponse) throws {
         let status = statusCode(response)
         guard (200..<300).contains(status) else {
             if let envelope = try? JSONDecoder.api.decode(ErrorEnvelope.self, from: data) {
                 throw APIError.server(status: status, code: envelope.error.code, message: envelope.error.message)
             }
             throw APIError.server(status: status, code: "http_\(status)", message: "请求失败（\(status)）")
-        }
-        do {
-            return try JSONDecoder.api.decode(T.self, from: data)
-        } catch {
-            throw APIError.decoding(underlying: error)
         }
     }
 }

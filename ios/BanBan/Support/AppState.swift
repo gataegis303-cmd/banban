@@ -57,12 +57,19 @@ final class AppState: ObservableObject {
     @Published private(set) var isNewUser = false
 
     private let authRepository: AuthRepository
+    /// 与 authRepository 共享同一 APIClient（共享 Keychain 令牌与 401 刷新链路）
+    private let userRepository: UserRepository
 
-    init(authRepository: AuthRepository = AuthRepository(client: APIClient())) {
-        self.authRepository = authRepository
-        // 启动恢复：Keychain 有令牌直接进主流程（资料/推荐拉取在 P4 接 bootstrap）
+    /// 资料 bootstrap / 保存失败的提示文案（视图层展示后置 nil 复位）
+    @Published var profileError: String?
+
+    init(client: APIClient = APIClient()) {
+        self.authRepository = AuthRepository(client: client)
+        self.userRepository = UserRepository(client: client)
+        // 启动恢复：Keychain 有令牌直接进主流程，并异步拉取服务端资料
         if authRepository.tokens.hasTokens {
             phase = .main
+            Task { await bootstrapProfile() }
         }
     }
 
@@ -86,13 +93,50 @@ final class AppState: ObservableObject {
         draft = ProfileDraft(from: myProfile)
     }
 
-    func completeRegistration() {
-        myProfile = MyProfile(from: draft)
+    // MARK: 资料同步（P4 接后端 /me/profile）
+
+    /// 老用户登录进主流程：切相位 + 拉取服务端资料
+    func enterMainAfterLogin() {
         phase = .main
+        Task { await bootstrapProfile() }
     }
 
-    func saveProfileEdits() {
-        myProfile.apply(draft)
+    /// 拉取服务端资料并全量覆盖本地（启动恢复与登录后共用）
+    func bootstrapProfile() async {
+        do {
+            myProfile = MyProfile(response: try await userRepository.getProfile())
+        } catch {
+            profileError = (error as? APIError)?.errorDescription ?? error.localizedDescription
+        }
+    }
+
+    /// 注册向导提交：增量合并 → 提交完成 → 以服务端合并结果覆盖本地 → 进主流程
+    /// 返回 false 时错误已写入 profileError，调用方留在向导展示
+    func submitRegistration() async -> Bool {
+        do {
+            let merged = try await userRepository.updateProfile(ProfileUpdateRequest(from: draft))
+            _ = try await userRepository.submitProfile()
+            // PUT 响应即合并后完整资料（completion 公式不含 profile_submitted，无需再回读）
+            myProfile = MyProfile(response: merged)
+            draft = ProfileDraft()
+            phase = .main
+            return true
+        } catch {
+            profileError = (error as? APIError)?.errorDescription ?? error.localizedDescription
+            return false
+        }
+    }
+
+    /// 编辑资料保存：增量合并 → 以服务端合并结果覆盖本地
+    func saveProfileEdits() async -> Bool {
+        do {
+            let merged = try await userRepository.updateProfile(ProfileUpdateRequest(from: draft))
+            myProfile = MyProfile(response: merged)
+            return true
+        } catch {
+            profileError = (error as? APIError)?.errorDescription ?? error.localizedDescription
+            return false
+        }
     }
 
     /// 推进卡片：cardIndex 允许等于 count（哨兵位，表示卡片已耗尽），故用 min 兜底
@@ -196,6 +240,7 @@ final class AppState: ObservableObject {
         // 异步撤销服务端 refresh token（失败不影响本地登出）
         Task { try? await authRepository.logout() }
         authRepository.tokens.clear()
+        myProfile = MyProfile()
         draft = ProfileDraft()
         cardIndex = 0
         likedUserIDs = []
@@ -208,6 +253,7 @@ final class AppState: ObservableObject {
         debugCode = nil
         isNewUser = false
         authError = nil
+        profileError = nil
         phase = .onboarding
     }
 }

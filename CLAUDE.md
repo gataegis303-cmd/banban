@@ -27,10 +27,12 @@ xcodebuild -project BanBan.xcodeproj -scheme BanBan -destination 'generic/platfo
 
 ### 数据模型
 
-- `ProfileDraft` 是向导编辑态草稿，`MyProfile` 是持久态。
-- 新增资料字段需同步两处：`ProfileDraft.init(from: MyProfile)` 和 `MyProfile.merge(_:)`。
+- `ProfileDraft` 是向导编辑态草稿，`MyProfile` 是持久态；登录后以服务端 `ProfileResponse` 为单真源（`MyProfile(response:)` 全量覆盖）。
+- 新增资料字段需同步四处：`ProfileDraft.init(from: MyProfile)`、`MyProfile.merge(_:)`、DTOs.swift 的 `ProfileResponse` / `ProfileUpdateRequest` 及其 `init(from: ProfileDraft)`。
 - `MyProfile.age` 以 `max(18, ...)` 钳制成车下限（18 = 成年）。
 - `photoCount` 上限 6。
+- 资料提交链路：`AppState.submitRegistration` / `saveProfileEdits`（async -> Bool，失败写 `profileError` 由视图 alert 展示）；照片上传能力在 `UserRepository`（WizardStep4 暂为本地占位，未接选图 UI）。
+- 后端返回的相对 `upload_url`（含 /api/v1 前缀）须按 `APIClient.serverRootURL` 解析，直接拼 baseURL 会双重前缀。
 
 ### AppState
 
@@ -76,6 +78,6 @@ xcodebuild -project BanBan.xcodeproj -scheme BanBan -destination 'generic/platfo
 ## 已知限制
 
 - 无测试（原型阶段，全部逻辑静态可验）
-- 无网络层 / 无数据持久化（MockData 静态数据）
+- 无本地数据持久化（资料以服务端为准；推荐 / 会话仍为 MockData 静态数据）
 - 无 CI/CD（手动构建验证）
 - `.autocorrectionDisabled(!autocorrect)` 默认关闭，未来长文本字段（如简介）应传 `autocorrect: true`

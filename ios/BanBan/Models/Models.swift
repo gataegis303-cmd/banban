@@ -118,6 +118,52 @@ struct MyProfile: Equatable {
         merge(draft)
     }
 
+    /// 后端 ProfileResponse → 持久态：服务端单真源，全量覆盖。
+    /// 非可选枚举解析失败 / 缺失时保留 init() 默认值兜底；age 仅服务端有值时覆盖
+    init(response: ProfileResponse) {
+        self.init()
+        nickname = response.nickname
+        if let a = response.age { age = max(18, a) }
+        birthday = response.birthday.flatMap(BirthdayFormat.date)
+        city = response.city
+        gender = response.gender.flatMap(Gender.init(rawValue:)) ?? gender
+        height = response.height
+        education = response.education
+        occupation = response.occupation
+        income = response.income
+        marriage = response.marriage.flatMap(MarriageStatus.init(rawValue:)) ?? marriage
+        children = response.children.flatMap(ChildrenStatus.init(rawValue:))
+        livingSituation = response.livingSituation
+        pets = Set(response.pets)
+        sleep = response.sleep.flatMap(SleepHabit.init(rawValue:)) ?? sleep
+        smoking = response.smoking.flatMap(YesNoSometimes.init(rawValue:))
+        drinking = response.drinking.flatMap(YesNoSometimes.init(rawValue:))
+        matchType = response.matchType
+        direction = response.direction.flatMap(MatchDirection.init(rawValue:)) ?? direction
+        partnerStatus = response.partnerStatus.flatMap(PartnerStatus.init(rawValue:)) ?? partnerStatus
+        seeking = response.seeking.flatMap(SeekingGender.init(rawValue:)) ?? seeking
+        livingMode = response.livingMode.flatMap(LivingMode.init(rawValue:))
+        childIntent = response.childIntent.flatMap(ChildIntent.init(rawValue:))
+        socialBoundary = response.socialBoundary.flatMap(SocialBoundary.init(rawValue:))
+        noAccept = response.noAccept
+        intendedCity = response.intendedCity
+        parentRelation = response.parentRelation.flatMap(ParentRelation.init(rawValue:)) ?? parentRelation
+        financeTrial = response.financeTrial.flatMap(FinanceMode.init(rawValue:)) ?? financeTrial
+        financeFormal = response.financeFormal.flatMap(FormalFinanceMode.init(rawValue:)) ?? financeFormal
+        transportNone = response.transportNone
+        transportTools = Set(response.transportTools)
+        transportCounts = response.transportCounts
+        taxiMonthlyQuota = response.taxiMonthlyQuota
+        housingSituation = response.housingSituation
+        spareRooms = response.spareRooms
+        housingConditions = Set(response.housingConditions)
+        resources = Set(response.resources)
+        otherTags = response.otherTags
+        startTime = response.startTime
+        completion = response.completion
+        photoCount = response.photos.count
+    }
+
     mutating func apply(_ draft: ProfileDraft) {
         merge(draft)
     }

@@ -34,6 +34,18 @@ struct MyProfileView: View {
         .fullScreenCover(isPresented: $showsEdit) {
             WizardFlowView(mode: .edit)
         }
+        // bootstrap 拉取失败提示（AppState 启动恢复 / 老用户登录后触发）
+        .alert(
+            "提示",
+            isPresented: Binding(
+                get: { appState.profileError != nil },
+                set: { if !$0 { appState.profileError = nil } }
+            )
+        ) {
+            Button("好的", role: .cancel) {}
+        } message: {
+            Text(appState.profileError ?? "")
+        }
     }
 
     // MARK: - 顶栏

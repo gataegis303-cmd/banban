@@ -80,6 +80,7 @@ struct WizardFlowView: View {
     @State private var step = 1
     @State private var showsValidationAlert = false
     @State private var validationMessage = ""
+    @State private var isSubmitting = false
 
     var body: some View {
         VStack(spacing: 0) {
@@ -114,6 +115,18 @@ struct WizardFlowView: View {
         } message: {
             Text(validationMessage)
         }
+        // 提交失败提示（错误文案集中在 AppState.profileError）
+        .alert(
+            "提示",
+            isPresented: Binding(
+                get: { appState.profileError != nil },
+                set: { if !$0 { appState.profileError = nil } }
+            )
+        ) {
+            Button("好的", role: .cancel) {}
+        } message: {
+            Text(appState.profileError ?? "")
+        }
     }
 
     // MARK: 底栏（步骤点 + 上一步 / 下一步 / 完成）
@@ -147,6 +160,7 @@ struct WizardFlowView: View {
                         WizardCapsuleButton(title: "完成", icon: "check") {
                             finish()
                         }
+                        .disabled(isSubmitting)
                     }
                 }
             }
@@ -163,12 +177,17 @@ struct WizardFlowView: View {
             showsValidationAlert = true
             return
         }
-        switch mode {
-        case .registration:
-            appState.completeRegistration()
-        case .edit:
-            appState.saveProfileEdits()
-            dismiss()
+        guard !isSubmitting else { return }
+        isSubmitting = true
+        Task {
+            defer { isSubmitting = false }
+            switch mode {
+            case .registration:
+                // 成功后由 phase 切换驱动根视图更替，无需 dismiss
+                _ = await appState.submitRegistration()
+            case .edit:
+                if await appState.saveProfileEdits() { dismiss() }
+            }
         }
     }
 
