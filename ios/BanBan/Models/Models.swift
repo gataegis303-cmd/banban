@@ -253,7 +253,7 @@ extension ProfileDraft {
     }
 }
 
-struct LifestyleItem: Identifiable, Hashable {
+struct LifestyleItem: Identifiable, Hashable, Decodable {
     let icon: String
     let label: String
     var id: String { label }

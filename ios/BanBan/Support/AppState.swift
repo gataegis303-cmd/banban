@@ -32,14 +32,18 @@ final class AppState: ObservableObject {
     @Published var preferredColorScheme: PreferredScheme = .dark
     @Published var myProfile = MyProfile()
     @Published var draft = ProfileDraft()
-    @Published var recommendations: [UserProfile] = MockData.recommendations
+    @Published var recommendations: [UserProfile] = []
     @Published var cardIndex = 0
+    /// 推荐列表拉取中（空态区分「加载中」与「真的没有更多」）
+    @Published var isLoadingRecommendations = false
     @Published var likedUserIDs: Set<String> = []
     @Published var skippedUserIDs: Set<String> = []
     @Published var matchUser: UserProfile?
     @Published var pendingChatUserID: String?
     @Published var conversations: [Conversation] = MockData.conversations
     @Published var filter = FilterState()
+    /// 推荐拉取 / like / skip 失败的提示文案（视图层展示后置 nil 复位）
+    @Published var homeError: String?
 
     // MARK: 认证态（P2 接后端登录）
 
@@ -59,6 +63,8 @@ final class AppState: ObservableObject {
     private let authRepository: AuthRepository
     /// 与 authRepository 共享同一 APIClient（共享 Keychain 令牌与 401 刷新链路）
     private let userRepository: UserRepository
+    /// 推荐与匹配仓库（同一 APIClient）
+    private let matchRepository: MatchRepository
 
     /// 资料 bootstrap / 保存失败的提示文案（视图层展示后置 nil 复位）
     @Published var profileError: String?
@@ -66,6 +72,7 @@ final class AppState: ObservableObject {
     init(client: APIClient = APIClient()) {
         self.authRepository = AuthRepository(client: client)
         self.userRepository = UserRepository(client: client)
+        self.matchRepository = MatchRepository(client: client)
         // 启动恢复：Keychain 有令牌直接进主流程，并异步拉取服务端资料
         if authRepository.tokens.hasTokens {
             phase = .main
@@ -101,12 +108,25 @@ final class AppState: ObservableObject {
         Task { await bootstrapProfile() }
     }
 
-    /// 拉取服务端资料并全量覆盖本地（启动恢复与登录后共用）
+    /// 拉取服务端资料并全量覆盖本地（启动恢复与登录后共用），随后拉取推荐列表
     func bootstrapProfile() async {
         do {
             myProfile = MyProfile(response: try await userRepository.getProfile())
         } catch {
             profileError = (error as? APIError)?.errorDescription ?? error.localizedDescription
+        }
+        await loadRecommendations()
+    }
+
+    /// 拉取后端推荐列表并重置卡片游标（耗尽后可再次调用刷新）
+    func loadRecommendations() async {
+        isLoadingRecommendations = true
+        defer { isLoadingRecommendations = false }
+        do {
+            recommendations = try await matchRepository.fetchRecommendations()
+            cardIndex = 0
+        } catch {
+            homeError = (error as? APIError)?.errorDescription ?? error.localizedDescription
         }
     }
 
@@ -144,18 +164,29 @@ final class AppState: ObservableObject {
         cardIndex = min(cardIndex + 1, recommendations.count)
     }
 
-    /// 喜欢：记录 + 推进卡片 + 弹出匹配成功（推进内聚在此，与 skipCurrent 对称）
-    func likeCurrent() {
+    /// 喜欢：后端登记成功才推进卡片；双向命中时弹匹配成功（对方即当前卡片，无需回查）
+    func likeCurrent() async {
         guard let user = currentCard else { return }
-        likedUserIDs.insert(user.id)
-        advanceCard()
-        matchUser = user
+        do {
+            let result = try await matchRepository.like(userID: user.id)
+            likedUserIDs.insert(user.id)
+            advanceCard()
+            if result.matched { matchUser = user }
+        } catch {
+            homeError = (error as? APIError)?.errorDescription ?? error.localizedDescription
+        }
     }
 
-    func skipCurrent() {
+    /// 跳过：后端登记成功才推进卡片（失败可原地重试）
+    func skipCurrent() async {
         guard let user = currentCard else { return }
-        skippedUserIDs.insert(user.id)
-        advanceCard()
+        do {
+            try await matchRepository.skip(userID: user.id)
+            skippedUserIDs.insert(user.id)
+            advanceCard()
+        } catch {
+            homeError = (error as? APIError)?.errorDescription ?? error.localizedDescription
+        }
     }
 
     /// 匹配成功后进入聊天：无既有会话则新建（id 规则 u-xxx → c-xxx，插入列表首位）
@@ -242,7 +273,9 @@ final class AppState: ObservableObject {
         authRepository.tokens.clear()
         myProfile = MyProfile()
         draft = ProfileDraft()
+        recommendations = []
         cardIndex = 0
+        isLoadingRecommendations = false
         likedUserIDs = []
         skippedUserIDs = []
         matchUser = nil
@@ -254,6 +287,7 @@ final class AppState: ObservableObject {
         isNewUser = false
         authError = nil
         profileError = nil
+        homeError = nil
         phase = .onboarding
     }
 }

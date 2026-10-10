@@ -16,18 +16,31 @@ struct HomeView: View {
                         HomeCardView(
                             user: user,
                             onOpenDetail: { path.append(user) },
-                            onSkip: { appState.skipCurrent() },
-                            onLike: { appState.likeCurrent() }
+                            onSkip: { Task { await appState.skipCurrent() } },
+                            onLike: { Task { await appState.likeCurrent() } }
                         )
                         .padding(.horizontal, 16)
                         .padding(.top, 8)
                         .padding(.bottom, 16)
+                    } else if appState.isLoadingRecommendations {
+                        ProgressView()
+                            .padding(.top, 60)
                     } else {
-                        EmptyStateView(
-                            icon: "heart.text.square",
-                            title: "暂时没有更多推荐",
-                            subtitle: "调整筛选条件，或稍后再来看看"
-                        )
+                        VStack(spacing: 16) {
+                            EmptyStateView(
+                                icon: "heart.text.square",
+                                title: "暂时没有更多推荐",
+                                subtitle: "调整筛选条件，或稍后再来看看"
+                            )
+                            Button {
+                                Task { await appState.loadRecommendations() }
+                            } label: {
+                                Text("刷新推荐")
+                                    .font(BanBanFont.body.weight(.medium))
+                                    .foregroundStyle(Color.banbanPrimary)
+                            }
+                            .buttonStyle(.plain)
+                        }
                         .padding(.top, 60)
                     }
                 }
@@ -43,6 +56,17 @@ struct HomeView: View {
         }
         .sheet(isPresented: $showsFilter) {
             FilterView()
+        }
+        .alert(
+            "提示",
+            isPresented: Binding(
+                get: { appState.homeError != nil },
+                set: { if !$0 { appState.homeError = nil } }
+            )
+        ) {
+            Button("好的", role: .cancel) {}
+        } message: {
+            Text(appState.homeError ?? "")
         }
         .fullScreenCover(item: $appState.matchUser) { user in
             MatchSuccessView(

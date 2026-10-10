@@ -162,13 +162,13 @@ struct ProfileDetailView: View {
     private var actionBar: some View {
         HStack(spacing: 12) {
             SecondaryButton(title: "跳过", icon: "xmark") {
-                appState.skipCurrent()
+                Task { await appState.skipCurrent() }
                 dismiss()
             }
             .layoutPriority(1)
 
             PrimaryButton(title: "喜欢", icon: "heart.fill") {
-                appState.likeCurrent()
+                Task { await appState.likeCurrent() }
                 dismiss()
             }
             .layoutPriority(1.6)

@@ -239,3 +239,67 @@ struct PhotoUploadResponse: Decodable {
 struct PhotoReorderRequest: Encodable {
     let photoIds: [String]
 }
+
+// MARK: - 推荐 / 匹配（P6）
+
+/// 用户投影（后端 project_user_profile 输出，键名对齐 iOS UserProfile）；
+/// avatarURL / photos 为服务器相对路径（/static/...），转换时按 serverRootURL 补全
+struct UserProjectionResponse: Decodable {
+    let id: String
+    let name: String
+    let age: Int
+    let city: String
+    let occupation: String
+    let avatarURL: String?
+    let verified: Bool
+    let headline: String
+    let cardTags: [String]
+    let intentionTags: [String]
+    let noAccept: [String]
+    let lifestyle: [LifestyleItem]
+    let aboutMe: String
+    let photos: [String]
+
+    /// 投影 → iOS UserProfile（相对路径补全为绝对 URL；OSS 绝对 URL 原样解析）
+    func userProfile(serverRoot: URL) -> UserProfile {
+        func resolve(_ path: String?) -> URL? {
+            guard let path, !path.isEmpty else { return nil }
+            if let url = URL(string: path), url.scheme != nil { return url }
+            return URL(string: path, relativeTo: serverRoot)
+        }
+        return UserProfile(
+            id: id,
+            name: name,
+            age: age,
+            city: city,
+            occupation: occupation,
+            avatarURL: resolve(avatarURL),
+            verified: verified,
+            headline: headline,
+            cardTags: cardTags,
+            intentionTags: intentionTags,
+            noAccept: noAccept,
+            lifestyle: lifestyle,
+            aboutMe: aboutMe,
+            photos: photos.map { resolve($0) }
+        )
+    }
+}
+
+/// 推荐条目：score / distance_km 供服务端排序，iOS 仅消费 user 投影
+struct RecommendationItem: Decodable {
+    let score: Double
+    let distanceKm: Double?
+    let user: UserProjectionResponse
+}
+
+/// GET /recommendations 响应
+struct RecommendationListResponse: Decodable {
+    let items: [RecommendationItem]
+}
+
+/// POST /recommendations/{id}/like 响应（双向命中时 matched + match_id）
+struct LikeActionResponse: Decodable {
+    let matched: Bool
+    let matchId: String?
+}
