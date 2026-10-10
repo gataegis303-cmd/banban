@@ -41,6 +41,31 @@ final class AppState: ObservableObject {
     @Published var conversations: [Conversation] = MockData.conversations
     @Published var filter = FilterState()
 
+    // MARK: 认证态（P2 接后端登录）
+
+    /// 认证栈导航路径（OnboardingFlowView 的 NavigationStack 绑定此数组）
+    @Published var authPath: [AuthRoute] = []
+    @Published var isSendingCode = false
+    @Published var isVerifying = false
+    /// 登录/发送验证码失败的提示文案（视图层展示后置 nil 复位）
+    @Published var authError: String?
+    /// 开发环境验证码回显（后端 APP_DEBUG=true 才下发，生产恒为 nil）
+    @Published private(set) var debugCode: String?
+    /// 最近一次发送验证码的手机号（验证码页脱敏展示）
+    @Published private(set) var lastSentPhone: String?
+    /// 登录结果：true = 新注册（引导进注册流）
+    @Published private(set) var isNewUser = false
+
+    private let authRepository: AuthRepository
+
+    init(authRepository: AuthRepository = AuthRepository(client: APIClient())) {
+        self.authRepository = authRepository
+        // 启动恢复：Keychain 有令牌直接进主流程（资料/推荐拉取在 P4 接 bootstrap）
+        if authRepository.tokens.hasTokens {
+            phase = .main
+        }
+    }
+
     var currentCard: UserProfile? {
         guard recommendations.indices.contains(cardIndex) else { return nil }
         return recommendations[cardIndex]
@@ -133,7 +158,44 @@ final class AppState: ObservableObject {
         conversations[index].hasUnreadDot = false
     }
 
+    // MARK: 登录流（调用方约定：返回 true 才推进导航）
+
+    /// 发送验证码；成功后记录手机号与开发回显码，由调用方推入验证码页
+    func sendSMS(_ phone: String) async -> Bool {
+        isSendingCode = true
+        authError = nil
+        defer { isSendingCode = false }
+        do {
+            let response = try await authRepository.sendSMS(phone)
+            lastSentPhone = phone
+            debugCode = response.debugCode
+            return true
+        } catch {
+            authError = (error as? APIError)?.errorDescription ?? error.localizedDescription
+            return false
+        }
+    }
+
+    /// 验证码校验 → 登录/注册，令牌已在仓库层落 Keychain；
+    /// 新用户由调用方引导进实名认证（继续注册流），老用户直接进主流程
+    func verifyCode(_ code: String, phone: String) async -> Bool {
+        isVerifying = true
+        authError = nil
+        defer { isVerifying = false }
+        do {
+            let pair = try await authRepository.verify(code, phone: phone)
+            isNewUser = pair.isNewUser
+            return true
+        } catch {
+            authError = (error as? APIError)?.errorDescription ?? error.localizedDescription
+            return false
+        }
+    }
+
     func logout() {
+        // 异步撤销服务端 refresh token（失败不影响本地登出）
+        Task { try? await authRepository.logout() }
+        authRepository.tokens.clear()
         draft = ProfileDraft()
         cardIndex = 0
         likedUserIDs = []
@@ -141,6 +203,11 @@ final class AppState: ObservableObject {
         matchUser = nil
         filter = FilterState()
         conversations = MockData.conversations
+        authPath = []
+        lastSentPhone = nil
+        debugCode = nil
+        isNewUser = false
+        authError = nil
         phase = .onboarding
     }
 }

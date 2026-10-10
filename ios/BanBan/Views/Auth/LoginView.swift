@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct LoginView: View {
+    @EnvironmentObject var appState: AppState
     @Environment(\.dismiss) private var dismiss
     @State private var phone = ""
     @State private var agreed = false
@@ -74,12 +75,18 @@ struct LoginView: View {
             .buttonStyle(.plain)
             .padding(.top, 16)
 
+            // 发送失败提示（下次点击前置 nil 复位）
+            if let authError = appState.authError {
+                InfoBanner(text: authError, style: .warning)
+                    .padding(.top, 12)
+            }
+
             Spacer()
 
-            NavigationLink(value: AuthRoute.verifyID) {
-                PrimaryButtonLabel(title: "获取验证码")
+            PrimaryButton(title: appState.isSendingCode ? "发送中…" : "获取验证码") {
+                Task { await sendCode() }
             }
-            .disabled(!isValid)
+            .disabled(!isValid || appState.isSendingCode)
 
             HStack(spacing: 4) {
                 Text("遇到问题？")
@@ -111,4 +118,13 @@ struct LoginView: View {
         }
     }
 
+    // MARK: - 动作
+
+    /// 发送验证码；成功由 AppState 记录手机号/回显码，此处推入验证码页
+    private func sendCode() async {
+        hideKeyboard()
+        if await appState.sendSMS(phone) {
+            appState.authPath.append(.codeInput)
+        }
+    }
 }

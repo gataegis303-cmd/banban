@@ -10,6 +10,7 @@ import SwiftUI
 /// 认证栈内路由
 enum AuthRoute: Hashable {
     case login
+    case codeInput
     case verifyID
     case permissions
 }
@@ -17,7 +18,6 @@ enum AuthRoute: Hashable {
 struct OnboardingFlowView: View {
     @EnvironmentObject var appState: AppState
     @State private var page = 0
-    @State private var path = NavigationPath()
 
     /// 三张引导卡（lucide → SF Symbol 映射）
     private let cards: [(icon: String, title: String, subtitle: String)] = [
@@ -30,7 +30,8 @@ struct OnboardingFlowView: View {
     ]
 
     var body: some View {
-        NavigationStack(path: $path) {
+        // 绑定 appState.authPath：验证码页（CodeInputView）通过 AppState 推栈
+        NavigationStack(path: $appState.authPath) {
             VStack(spacing: 0) {
                 TabView(selection: $page) {
                     ForEach(cards.indices, id: \.self) { index in
@@ -44,10 +45,10 @@ struct OnboardingFlowView: View {
 
                 VStack(spacing: 16) {
                     PrimaryButton(title: "开始使用") {
-                        path.append(AuthRoute.login)
+                        appState.authPath.append(AuthRoute.login)
                     }
                     Button {
-                        path.append(AuthRoute.login)
+                        appState.authPath.append(AuthRoute.login)
                     } label: {
                         HStack(spacing: 4) {
                             Text("已有账号，")
@@ -68,6 +69,8 @@ struct OnboardingFlowView: View {
                 switch route {
                 case .login:
                     LoginView()
+                case .codeInput:
+                    CodeInputView()
                 case .verifyID:
                     VerifyIDView(mode: .registration)
                 case .permissions:
