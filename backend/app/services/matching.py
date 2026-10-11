@@ -37,6 +37,8 @@ from app.schemas.matching import (
     RecommendationListOut,
 )
 from app.services.projection import project_user_profile
+from app.ws import events
+from app.ws.hub import hub
 
 # 每批推荐条数（iOS HomeView 单批展示量；真实召回/分页策略 P12 再做）
 DEFAULT_RECOMMEND_LIMIT = 10
@@ -168,6 +170,7 @@ async def react(
 
     matched = False
     match_id: uuid.UUID | None = None
+    new_match_created = False
     if direction == LikeDirection.like:
         other_like = await db.scalar(
             select(Like).where(
@@ -195,6 +198,7 @@ async def react(
                         db.add(conversation)
                         await db.flush()
                     matched, match_id = True, match.id
+                    new_match_created = True
                 except IntegrityError:
                     # 并发双向 like：对方请求已建 match；savepoint 已回滚
                     # （match 与 conversation 一起），外层事务不受影响
@@ -206,6 +210,13 @@ async def react(
                     matched, match_id = True, existing.id
 
     await db.commit()
+
+    # 新匹配实时通知对方（仅新建时；重复 like 幂等不重发）
+    if new_match_created and match_id is not None:
+        await hub.send_to_user(
+            target_id, {"type": events.MATCH, "match_id": str(match_id)}
+        )
+
     return LikeActionResponse(matched=matched, match_id=match_id)
 
 

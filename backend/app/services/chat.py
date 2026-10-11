@@ -79,7 +79,7 @@ async def list_messages(
     limit: int = DEFAULT_MESSAGE_PAGE_SIZE,
 ) -> MessageListOut:
     """消息历史：seq 倒序取页（cursor 之前的更早消息），items 以旧→新排序返回。"""
-    conversation = await _get_conversation_or_404(db, user, conversation_id)
+    conversation = await _get_conversation_or_404(db, user.id, conversation_id)
 
     stmt = (
         select(Message)
@@ -112,14 +112,14 @@ async def list_messages(
 
 
 async def send_message(
-    db: AsyncSession, user: User, conversation_id: uuid.UUID, data: SendMessageIn
+    db: AsyncSession, user_id: uuid.UUID, conversation_id: uuid.UUID, data: SendMessageIn
 ) -> MessageOut:
-    """HTTP 兜底发消息：锁会话行分配 seq，更新摘要与对方未读（WS 主通道 P8 接入）。"""
+    """HTTP 兜底 / WS 通道共用：锁会话行分配 seq，更新摘要与对方未读。"""
     # FOR UPDATE 锁会话行：同会话并发发送串行化，保证 seq 严格递增
     conversation = await db.scalar(
         select(Conversation).where(Conversation.id == conversation_id).with_for_update()
     )
-    if conversation is None or user.id not in (
+    if conversation is None or user_id not in (
         conversation.user_a_id,
         conversation.user_b_id,
     ):
@@ -135,7 +135,7 @@ async def send_message(
     )
     message = Message(
         conversation_id=conversation.id,
-        sender_id=user.id,
+        sender_id=user_id,
         seq=(max_seq or 0) + 1,
         content=data.content,
         client_msg_id=data.client_msg_id,
@@ -145,7 +145,7 @@ async def send_message(
 
     conversation.last_message_text = data.content
     conversation.last_message_at = message.created_at
-    if conversation.user_a_id == user.id:
+    if conversation.user_a_id == user_id:
         conversation.user_b_unread += 1
     else:
         conversation.user_a_unread += 1
@@ -161,10 +161,10 @@ async def send_message(
     )
 
 
-async def mark_read(db: AsyncSession, user: User, conversation_id: uuid.UUID) -> None:
-    """清零我的未读计数（进入会话/收到已读回执时调用）。"""
-    conversation = await _get_conversation_or_404(db, user, conversation_id)
-    if conversation.user_a_id == user.id:
+async def mark_read(db: AsyncSession, user_id: uuid.UUID, conversation_id: uuid.UUID) -> None:
+    """清零我的未读计数（进入会话 / WS read 事件时调用）。"""
+    conversation = await _get_conversation_or_404(db, user_id, conversation_id)
+    if conversation.user_a_id == user_id:
         conversation.user_a_unread = 0
     else:
         conversation.user_b_unread = 0
@@ -175,7 +175,7 @@ async def delete_conversation(
     db: AsyncSession, user: User, conversation_id: uuid.UUID
 ) -> None:
     """unmatch：删 match 行，conversations / messages 随级联清除。"""
-    conversation = await _get_conversation_or_404(db, user, conversation_id)
+    conversation = await _get_conversation_or_404(db, user.id, conversation_id)
     match = await db.get(Match, conversation.match_id)
     if match is not None:
         await db.delete(match)
@@ -186,11 +186,11 @@ async def delete_conversation(
 
 
 async def _get_conversation_or_404(
-    db: AsyncSession, user: User, conversation_id: uuid.UUID
+    db: AsyncSession, user_id: uuid.UUID, conversation_id: uuid.UUID
 ) -> Conversation:
     """取会话并校验参与方身份（非参与方与不存在一律 404，不泄露存在性）。"""
     conversation = await db.get(Conversation, conversation_id)
-    if conversation is None or user.id not in (
+    if conversation is None or user_id not in (
         conversation.user_a_id,
         conversation.user_b_id,
     ):

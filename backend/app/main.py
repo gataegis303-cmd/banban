@@ -13,11 +13,12 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 from app.adapters import oss
 from app.config import settings
 from app.routers import auth, chat, health, matches, profile, recommendations
+from app.ws import handler as ws_handler
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # 启动：WS Hub 在 P8 初始化
+    # 启动：WS Hub 为模块级单例，随 import 就绪
     yield
     # 关闭：释放 Redis 连接与数据库引擎连接池
     from app.deps import engine, redis_client
@@ -74,6 +75,9 @@ app.include_router(profile.router, prefix="/api/v1")
 app.include_router(recommendations.router, prefix="/api/v1")
 app.include_router(matches.router, prefix="/api/v1")
 app.include_router(chat.router, prefix="/api/v1")
+
+# WebSocket 端点（设计连接地址为 /ws/chat，不带 /api/v1 前缀）
+app.include_router(ws_handler.router)
 
 # 照片静态访问（开发环境本地落盘；生产由 OSS/CDN 替代）
 # check_dir=False：photos 目录在首次保存时才创建

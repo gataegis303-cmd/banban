@@ -41,15 +41,15 @@ async def send_message(
     user: CurrentUser,
     db: DBSession,
 ) -> MessageOut:
-    """HTTP 兜底发消息（WS 为主通道，P8 接入）"""
-    return await chat.send_message(db, user, conversation_id, data)
+    """HTTP 兜底发消息（WS 为主通道）"""
+    return await chat.send_message(db, user.id, conversation_id, data)
 
 
 @router.post("/{conversation_id}/read", status_code=204)
 async def mark_read(
     conversation_id: uuid.UUID, user: CurrentUser, db: DBSession
 ) -> Response:
-    await chat.mark_read(db, user, conversation_id)
+    await chat.mark_read(db, user.id, conversation_id)
     return Response(status_code=204)
 
 
