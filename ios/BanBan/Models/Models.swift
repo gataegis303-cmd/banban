@@ -278,20 +278,67 @@ struct UserProfile: Identifiable, Hashable {
     var initial: String { String(name.prefix(1)) }
 }
 
+/// 单条消息：id 为服务端 public_id（乐观发送阶段为临时 client_msg_id，ack 到达后替换）
 struct ChatMessage: Identifiable, Equatable {
-    let id = UUID()
+    var id: String
     let isMe: Bool
     let text: String
+    /// 服务端权威时间戳（乐观发送阶段为本地时间，ack 后覆盖）
+    var timestamp: Date?
+    /// 会话内严格递增序号（服务端权威，0 = 待 ack）
+    var seq: Int64
+    /// 乐观插入尚未收到 ack（气泡半透明展示）
+    var isPending: Bool
+
+    init(
+        id: String = UUID().uuidString,
+        isMe: Bool,
+        text: String,
+        timestamp: Date? = nil,
+        seq: Int64 = 0,
+        isPending: Bool = false
+    ) {
+        self.id = id
+        self.isMe = isMe
+        self.text = text
+        self.timestamp = timestamp
+        self.seq = seq
+        self.isPending = isPending
+    }
 }
 
 struct Conversation: Identifiable, Equatable {
     let id: String
     let user: UserProfile
     var lastMessage: String
-    var timeLabel: String
+    var lastMessageAt: Date?
     var unreadCount: Int
-    var hasUnreadDot: Bool
     var messages: [ChatMessage]
+    /// 是否还有更早的历史（历史分页游标未到头，ChatView 顶部显示加载入口）
+    var hasMoreHistory: Bool
+
+    /// 列表时间角标：今天 → HH:mm，昨天 → "昨天"，更早 → M/d
+    var timeLabel: String { Conversation.timeLabel(for: lastMessageAt) }
+
+    static func timeLabel(for date: Date?) -> String {
+        guard let date else { return "" }
+        let calendar = Calendar.current
+        if calendar.isDateInToday(date) { return timeFormatter.string(from: date) }
+        if calendar.isDateInYesterday(date) { return "昨天" }
+        return dayFormatter.string(from: date)
+    }
+
+    private static let timeFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "HH:mm"
+        return formatter
+    }()
+
+    private static let dayFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "M/d"
+        return formatter
+    }()
 }
 
 struct FilterState: Equatable {

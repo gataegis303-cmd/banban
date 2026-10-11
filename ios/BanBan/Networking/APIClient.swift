@@ -126,4 +126,36 @@ extension JSONDecoder {
         decoder.keyDecodingStrategy = .convertFromSnakeCase
         return decoder
     }()
+
+    /// 会话/消息解码策略：在后端契约基础上增加 ISO8601 日期解析
+    /// （FastAPI 序列化 datetime 带微秒小数，全局 decoder 默认不识别）
+    static let chat: JSONDecoder = {
+        let decoder = JSONDecoder()
+        decoder.keyDecodingStrategy = .convertFromSnakeCase
+        decoder.dateDecodingStrategy = .custom { decoder in
+            let container = try decoder.singleValueContainer()
+            let raw = try container.decode(String.self)
+            if let date = ChatDateFormatter.parse(raw) { return date }
+            throw DecodingError.dataCorruptedError(
+                in: container,
+                debugDescription: "无法解析的 ISO8601 日期：\(raw)"
+            )
+        }
+        return decoder
+    }()
+}
+
+/// ISO8601 解析：优先带小数秒（FastAPI datetime 默认输出），兼容整秒
+enum ChatDateFormatter {
+    private static let withFractionalSeconds: ISO8601DateFormatter = {
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        return formatter
+    }()
+
+    private static let plain = ISO8601DateFormatter()
+
+    static func parse(_ string: String) -> Date? {
+        withFractionalSeconds.date(from: string) ?? plain.date(from: string)
+    }
 }

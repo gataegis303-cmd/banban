@@ -40,10 +40,21 @@ final class AppState: ObservableObject {
     @Published var skippedUserIDs: Set<String> = []
     @Published var matchUser: UserProfile?
     @Published var pendingChatUserID: String?
-    @Published var conversations: [Conversation] = MockData.conversations
+    @Published var conversations: [Conversation] = []
     @Published var filter = FilterState()
     /// 推荐拉取 / like / skip 失败的提示文案（视图层展示后置 nil 复位）
     @Published var homeError: String?
+
+    // MARK: 聊天（P9 接后端 + WebSocket）
+
+    /// WebSocket 连接状态（MessagesView 顶栏可展示断线提示）
+    @Published private(set) var chatConnection: WebSocketClient.ConnectionState = .idle
+    /// 当前在线的匹配对象（ChatView 头部绿点）
+    @Published private(set) var onlineUserIDs: Set<String> = []
+    /// 对方正在输入的会话（ChatView 底部提示，几秒后自动消失）
+    @Published private(set) var typingConversationIDs: Set<String> = []
+    /// 我自己的 user id（isMe 映射 / 参与方判定，登录后从 access token 解出）
+    @Published private(set) var myUserID: String?
 
     // MARK: 认证态（P2 接后端登录）
 
@@ -65,18 +76,34 @@ final class AppState: ObservableObject {
     private let userRepository: UserRepository
     /// 推荐与匹配仓库（同一 APIClient）
     private let matchRepository: MatchRepository
+    /// 会话与消息仓库（同一 APIClient）
+    private let chatRepository: ChatRepository
+    /// WebSocket 客户端（聊天实时通道）
+    private let socket = WebSocketClient()
+    /// 共享 API 客户端（WS URL 派生自 serverRootURL）
+    private let client: APIClient
+    /// 历史分页游标：conversationID → 下一页（更早）cursor
+    private var historyCursors: [String: String] = [:]
 
     /// 资料 bootstrap / 保存失败的提示文案（视图层展示后置 nil 复位）
     @Published var profileError: String?
 
     init(client: APIClient = APIClient()) {
+        self.client = client
         self.authRepository = AuthRepository(client: client)
         self.userRepository = UserRepository(client: client)
         self.matchRepository = MatchRepository(client: client)
+        self.chatRepository = ChatRepository(client: client)
         // 启动恢复：Keychain 有令牌直接进主流程，并异步拉取服务端资料
         if authRepository.tokens.hasTokens {
             phase = .main
             Task { await bootstrapProfile() }
+        }
+        socket.onEvent = { [weak self] event in
+            self?.handleSocketEvent(event)
+        }
+        socket.onStateChange = { [weak self] state in
+            self?.chatConnection = state
         }
     }
 
@@ -85,9 +112,16 @@ final class AppState: ObservableObject {
         return recommendations[cardIndex]
     }
 
-    /// 未读总数：各会话未读求和；「已读但有红点」的会话按 1 计
+    /// 未读总数：各会话未读求和
     var totalUnread: Int {
-        conversations.reduce(0) { $0 + $1.unreadCount } + (conversations.contains { $0.hasUnreadDot } ? 1 : 0)
+        conversations.reduce(0) { $0 + $1.unreadCount }
+    }
+
+    /// 会话按最近消息时间倒序（nil 沉底；ForEach 用 id 保持行稳定）
+    var sortedConversations: [Conversation] {
+        conversations.sorted {
+            ($0.lastMessageAt ?? .distantPast) > ($1.lastMessageAt ?? .distantPast)
+        }
     }
 
     func completeOnboarding() {
@@ -108,7 +142,7 @@ final class AppState: ObservableObject {
         Task { await bootstrapProfile() }
     }
 
-    /// 拉取服务端资料并全量覆盖本地（启动恢复与登录后共用），随后拉取推荐列表
+    /// 拉取服务端资料并全量覆盖本地（启动恢复与登录后共用），随后拉取推荐与会话、连 WS
     func bootstrapProfile() async {
         do {
             myProfile = MyProfile(response: try await userRepository.getProfile())
@@ -116,6 +150,8 @@ final class AppState: ObservableObject {
             profileError = (error as? APIError)?.errorDescription ?? error.localizedDescription
         }
         await loadRecommendations()
+        await loadConversations()
+        connectChat()
     }
 
     /// 拉取后端推荐列表并重置卡片游标（耗尽后可再次调用刷新）
@@ -189,26 +225,6 @@ final class AppState: ObservableObject {
         }
     }
 
-    /// 匹配成功后进入聊天：无既有会话则新建（id 规则 u-xxx → c-xxx，插入列表首位）
-    func ensureConversation(for userID: String) -> String? {
-        if let existing = conversations.first(where: { $0.user.id == userID }) {
-            return existing.id
-        }
-        guard let user = recommendations.first(where: { $0.id == userID }) else { return nil }
-        let conversationID = userID.replacingOccurrences(of: "u-", with: "c-")
-        let conversation = Conversation(
-            id: conversationID,
-            user: user,
-            lastMessage: "",
-            timeLabel: "刚刚",
-            unreadCount: 0,
-            hasUnreadDot: false,
-            messages: []
-        )
-        conversations.insert(conversation, at: 0)
-        return conversationID
-    }
-
     func startChatAfterMatch() {
         pendingChatUserID = matchUser?.id
         matchUser = nil
@@ -218,19 +234,196 @@ final class AppState: ObservableObject {
         matchUser = nil
     }
 
-    func send(to conversationID: String, text: String) {
-        guard let index = conversations.firstIndex(where: { $0.id == conversationID }) else { return }
-        conversations[index].messages.append(ChatMessage(isMe: true, text: text))
-        conversations[index].lastMessage = text
-        conversations[index].timeLabel = "刚刚"
-        conversations[index].unreadCount = 0
-        conversations[index].hasUnreadDot = false
+    // MARK: 会话 / 消息（P9 接后端）
+
+    /// 拉取会话列表（合并保留既有历史消息：列表接口不带消息体）
+    func loadConversations() async {
+        do {
+            let items = try await chatRepository.fetchConversations()
+            let serverRoot = client.serverRootURL
+            conversations = items.map { response in
+                let user = response.user.userProfile(serverRoot: serverRoot)
+                let existing = conversations.first { $0.id == response.id }
+                return Conversation(
+                    id: response.id,
+                    user: user,
+                    lastMessage: response.lastMessageText ?? "",
+                    lastMessageAt: response.lastMessageAt,
+                    unreadCount: response.unreadCount,
+                    messages: existing?.messages ?? [],
+                    hasMoreHistory: existing?.hasMoreHistory ?? false
+                )
+            }
+        } catch {
+            // 会话列表拉取失败静默：下次进入消息页 / 收到 WS 事件时重试
+        }
     }
 
+    /// 拉取某会话的消息历史（首次进入拉最新一页，之后按游标加载更早）
+    func loadMessages(conversationID: String, loadOlder: Bool = false) async {
+        guard conversations.contains(where: { $0.id == conversationID }) else { return }
+        // 首次进入或加载更早：有游标且已无更多则跳过
+        let cursor = loadOlder ? historyCursors[conversationID] : nil
+        if loadOlder && cursor == nil { return }
+        do {
+            let page = try await chatRepository.fetchMessages(
+                conversationID: conversationID, cursor: cursor
+            )
+            guard let index = conversations.firstIndex(where: { $0.id == conversationID }) else { return }
+            let mapped = page.items.map { message in
+                message.chatMessage(myUserID: myUserID)
+            }
+            conversations[index].messages = mapped + conversations[index].messages
+            conversations[index].hasMoreHistory = page.nextCursor != nil
+            historyCursors[conversationID] = page.nextCursor
+        } catch {
+            // 历史拉取失败静默：可再次点击「加载更早消息」重试
+        }
+    }
+
+    /// 发送消息：乐观插入 pending 气泡 → WS 主通道；未连接时 HTTP 兜底
+    func send(to conversationID: String, text: String) async {
+        guard conversations.contains(where: { $0.id == conversationID }) else { return }
+        let clientMsgID = UUID().uuidString
+        // 乐观插入：ack 到达后按 client_msg_id 替换为服务端 id
+        appendMessage(
+            to: conversationID,
+            ChatMessage(id: clientMsgID, isMe: true, text: text, timestamp: Date(), isPending: true)
+        )
+        let delivered = socket.send([
+            "type": "message",
+            "conversation_id": conversationID,
+            "content": text,
+            "client_msg_id": clientMsgID,
+        ])
+        guard !delivered else { return }
+        // WS 未连接：HTTP 兜底发送
+        do {
+            let message = try await chatRepository.sendMessage(
+                conversationID: conversationID, content: text, clientMsgID: clientMsgID
+            )
+            applyAck(conversationID: conversationID, clientMsgID: clientMsgID, message: message)
+        } catch {
+            // 发送失败：pending 气泡保留（用户可重发），错误由下次操作时呈现
+        }
+    }
+
+    /// 进入会话：本地未读清零 + 通知服务端已读
     func markConversationRead(_ conversationID: String) {
         guard let index = conversations.firstIndex(where: { $0.id == conversationID }) else { return }
         conversations[index].unreadCount = 0
-        conversations[index].hasUnreadDot = false
+        Task { try? await chatRepository.markRead(conversationID: conversationID) }
+    }
+
+    /// 匹配成功后进入聊天：刷新会话列表后返回对应会话 id
+    /// （后端双向 like 时已同步建会话，无需本地伪造）
+    func ensureConversation(for userID: String) async -> String? {
+        await loadConversations()
+        return conversations.first { $0.user.id == userID }?.id
+    }
+
+    // MARK: WebSocket 事件处理
+
+    private func connectChat() {
+        guard let token = authRepository.tokens.readAccess() else { return }
+        myUserID = JWT.sub(token)
+        var components = URLComponents(url: client.serverRootURL, resolvingAgainstBaseURL: false)
+        let isHTTPS = components?.scheme == "https"
+        components?.scheme = isHTTPS ? "wss" : "ws"
+        components?.path = "/ws/chat"
+        components?.queryItems = [URLQueryItem(name: "token", value: token)]
+        guard let url = components?.url else { return }
+        socket.connect(url: url)
+    }
+
+    private func handleSocketEvent(_ event: WSEvent) {
+        switch event.type {
+        case "hello":
+            chatConnection = .connected
+            socket.markConnected()
+        case "message":
+            handleIncomingMessage(event.payload)
+        case "ack":
+            handleAck(event.payload)
+        case "typing":
+            if let conversationID = event.payload["conversation_id"] as? String {
+                showTyping(conversationID: conversationID)
+            }
+        case "online_status":
+            if let userID = event.payload["user_id"] as? String,
+               let online = event.payload["online"] as? Bool {
+                if online {
+                    onlineUserIDs.insert(userID)
+                } else {
+                    onlineUserIDs.remove(userID)
+                }
+            }
+        case "match":
+            // 新匹配即新会话：刷新会话列表（推荐弹窗由 HTTP like 响应路径负责）
+            Task { await loadConversations() }
+        default:
+            break // read / pong / error：原型阶段无 UI 消费
+        }
+    }
+
+    /// 对方新消息：多设备自己回执按 id 去重；未知会话刷新列表兜底
+    private func handleIncomingMessage(_ payload: [String: Any]) {
+        guard let conversationID = payload["conversation_id"] as? String,
+              let data = try? JSONSerialization.data(withJSONObject: payload["message"] ?? [:]),
+              let message = try? JSONDecoder.chat.decode(MessageResponse.self, from: data)
+        else { return }
+        guard message.senderId != myUserID else { return } // 自己回执已由乐观插入覆盖
+        guard conversations.contains(where: { $0.id == conversationID }) else {
+            Task { await loadConversations() }
+            return
+        }
+        appendMessage(to: conversationID, message.chatMessage(myUserID: myUserID))
+        typingConversationIDs.remove(conversationID)
+    }
+
+    private func handleAck(_ payload: [String: Any]) {
+        guard let conversationID = payload["conversation_id"] as? String,
+              let clientMsgID = payload["client_msg_id"] as? String,
+              let data = try? JSONSerialization.data(withJSONObject: payload["message"] ?? [:]),
+              let message = try? JSONDecoder.chat.decode(MessageResponse.self, from: data)
+        else { return }
+        applyAck(conversationID: conversationID, clientMsgID: clientMsgID, message: message)
+    }
+
+    /// ack：把 pending 消息替换为服务端权威数据（id / seq / 时间戳）
+    private func applyAck(conversationID: String, clientMsgID: String, message: MessageResponse) {
+        guard let index = conversations.firstIndex(where: { $0.id == conversationID }) else { return }
+        guard let msgIndex = conversations[index].messages.firstIndex(where: { $0.id == clientMsgID }) else {
+            return
+        }
+        let confirmed = message.chatMessage(myUserID: myUserID)
+        conversations[index].messages[msgIndex] = ChatMessage(
+            id: confirmed.id,
+            isMe: true,
+            text: confirmed.text,
+            timestamp: confirmed.timestamp,
+            seq: confirmed.seq,
+            isPending: false
+        )
+    }
+
+    private func showTyping(conversationID: String) {
+        typingConversationIDs.insert(conversationID)
+        Task { [weak self] in
+            try? await Task.sleep(for: .seconds(4))
+            self?.typingConversationIDs.remove(conversationID)
+        }
+    }
+
+    /// 追加消息 + 同步会话摘要与时间；自己发送时顺带清未读
+    private func appendMessage(to conversationID: String, _ message: ChatMessage) {
+        guard let index = conversations.firstIndex(where: { $0.id == conversationID }) else { return }
+        conversations[index].messages.append(message)
+        conversations[index].lastMessage = message.text
+        conversations[index].lastMessageAt = message.timestamp
+        if message.isMe {
+            conversations[index].unreadCount = 0
+        }
     }
 
     // MARK: 登录流（调用方约定：返回 true 才推进导航）
@@ -280,7 +473,13 @@ final class AppState: ObservableObject {
         skippedUserIDs = []
         matchUser = nil
         filter = FilterState()
-        conversations = MockData.conversations
+        conversations = []
+        historyCursors = [:]
+        onlineUserIDs = []
+        typingConversationIDs = []
+        myUserID = nil
+        chatConnection = .idle
+        socket.disconnect()
         authPath = []
         lastSentPhone = nil
         debugCode = nil

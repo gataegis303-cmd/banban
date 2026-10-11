@@ -96,7 +96,7 @@ struct MessagesView: View {
                 .padding(.top, 80)
             } else {
                 LazyVStack(spacing: 0) {
-                    ForEach(appState.conversations) { conversation in
+                    ForEach(appState.sortedConversations) { conversation in
                         Button {
                             path.append(conversation.id)
                         } label: {
@@ -135,27 +135,18 @@ private struct ConversationRow: View {
                         .foregroundStyle(Color.banbanMutedForeground)
                         .lineLimit(1)
                     Spacer(minLength: 8)
-                    badge
+                    if conversation.unreadCount > 0 {
+                        Text("\(conversation.unreadCount)")
+                            .font(BanBanFont.caption)
+                            .foregroundStyle(Color.banbanErrorForeground)
+                            .frame(minWidth: 20, minHeight: 20)
+                            .background(Capsule().fill(Color.banbanError))
+                    }
                 }
             }
         }
         .padding(.horizontal, 20)
         .padding(.vertical, 12)
         .contentShape(Rectangle())
-    }
-
-    @ViewBuilder
-    private var badge: some View {
-        if conversation.unreadCount > 0 {
-            Text("\(conversation.unreadCount)")
-                .font(BanBanFont.caption)
-                .foregroundStyle(Color.banbanErrorForeground)
-                .frame(minWidth: 20, minHeight: 20)
-                .background(Capsule().fill(Color.banbanError))
-        } else if conversation.hasUnreadDot {
-            Circle()
-                .fill(Color.banbanError)
-                .frame(width: 8, height: 8)
-        }
     }
 }

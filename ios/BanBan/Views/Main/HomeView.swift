@@ -81,10 +81,13 @@ struct HomeView: View {
         }
         .onChange(of: appState.pendingChatUserID) { newValue in
             guard let userID = newValue else { return }
-            if let conversationID = appState.ensureConversation(for: userID) {
-                path.append(conversationID)
-            }
             appState.pendingChatUserID = nil
+            Task {
+                // 刷新会话列表后定位新会话（后端双向 like 时已同步建会话）
+                if let conversationID = await appState.ensureConversation(for: userID) {
+                    path.append(conversationID)
+                }
+            }
         }
     }
 

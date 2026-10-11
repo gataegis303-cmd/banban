@@ -31,6 +31,10 @@ struct ChatView: View {
         .onAppear {
             appState.markConversationRead(conversationID)
         }
+        .task {
+            // 首次进入拉取最新一页历史（再次进入有游标不重复拉）
+            await appState.loadMessages(conversationID: conversationID)
+        }
     }
 
     // MARK: - 头部
@@ -41,6 +45,15 @@ struct ChatView: View {
 
             if let user = conversation?.user {
                 AvatarView(url: user.avatarURL, size: 40, initial: user.initial)
+                    .overlay(alignment: .bottomTrailing) {
+                        // 在线绿点（WS online_status / hello 快照驱动）
+                        if appState.onlineUserIDs.contains(user.id) {
+                            Circle()
+                                .fill(Color.banbanSuccess)
+                                .frame(width: 10, height: 10)
+                                .overlay(Circle().stroke(Color.banbanCard, lineWidth: 2))
+                        }
+                    }
                 Text(user.name)
                     .font(BanBanFont.bodyLarge.weight(.semibold))
                     .foregroundStyle(Color.banbanForeground)
@@ -77,6 +90,16 @@ struct ChatView: View {
         ScrollViewReader { proxy in
             ScrollView {
                 LazyVStack(spacing: 16) {
+                    if let conversation, conversation.hasMoreHistory {
+                        Button {
+                            Task { await appState.loadMessages(conversationID: conversationID, loadOlder: true) }
+                        } label: {
+                            Text("加载更早消息")
+                                .font(BanBanFont.caption)
+                                .foregroundStyle(Color.banbanPrimary)
+                        }
+                        .buttonStyle(.plain)
+                    }
                     ForEach(conversation?.messages ?? []) { message in
                         MessageRow(
                             message: message,
@@ -84,6 +107,15 @@ struct ChatView: View {
                             otherAvatarURL: conversation?.user.avatarURL
                         )
                         .id(message.id)
+                    }
+                    if let conversationID = conversation?.id,
+                       appState.typingConversationIDs.contains(conversationID) {
+                        HStack {
+                            Text("对方正在输入…")
+                                .font(BanBanFont.caption)
+                                .foregroundStyle(Color.banbanMutedForeground)
+                            Spacer()
+                        }
                     }
                 }
                 .padding(.horizontal, 16)
@@ -137,8 +169,8 @@ struct ChatView: View {
     private func sendMessage() {
         let text = inputText.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !text.isEmpty else { return }
-        appState.send(to: conversationID, text: text)
         inputText = ""
+        Task { await appState.send(to: conversationID, text: text) }
     }
 
     private func scrollToLast(_ proxy: ScrollViewProxy) {
@@ -184,6 +216,8 @@ private struct MessageRow: View {
             .frame(maxWidth: 280, alignment: isMe ? .trailing : .leading)
             .background(isMe ? Color.banbanPrimary : Color.banbanMuted)
             .clipShape(BubbleShape(isMe: isMe))
+            // 乐观插入尚未 ack 的消息半透明展示
+            .opacity(message.isPending ? 0.6 : 1)
     }
 }
 

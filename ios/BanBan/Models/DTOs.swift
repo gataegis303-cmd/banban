@@ -303,3 +303,46 @@ struct LikeActionResponse: Decodable {
     let matched: Bool
     let matchId: String?
 }
+
+// MARK: - 会话 / 消息（P9）
+
+struct ConversationResponse: Decodable {
+    let id: String
+    let user: UserProjectionResponse
+    let lastMessageText: String?
+    let lastMessageAt: Date?
+    let unreadCount: Int
+    let createdAt: Date
+}
+
+struct ConversationListResponse: Decodable {
+    let items: [ConversationResponse]
+}
+
+struct MessageResponse: Decodable {
+    let id: String
+    let senderId: String
+    let seq: Int64
+    let type: String
+    let content: String
+    let createdAt: Date
+}
+
+struct MessageListResponse: Decodable {
+    let items: [MessageResponse]
+    /// 更早一页的游标；null 表示历史已到头
+    let nextCursor: String?
+}
+
+extension MessageResponse {
+    /// 服务端消息 → iOS 会话消息（isMe 由 sender_id 与我的 user id 比对得出）
+    func chatMessage(myUserID: String?) -> ChatMessage {
+        ChatMessage(
+            id: id,
+            isMe: senderId == myUserID,
+            text: content,
+            timestamp: createdAt,
+            seq: seq
+        )
+    }
+}
