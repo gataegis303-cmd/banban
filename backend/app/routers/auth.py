@@ -1,13 +1,17 @@
 #  auth.py
-#  认证路由：短信发送/验证登录 + refresh 换新 + logout 撤销
+#  认证路由：短信发送/验证登录 + 微信/Apple OAuth 登录 + refresh 换新 + logout 撤销
 
 from fastapi import APIRouter, HTTPException, Request, status
 from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.adapters import apple_auth, wechat_oauth
 from app.config import settings
 from app.deps import DBSession, redis_client
 from app.models.profile import Profile
+from app.models.user import User
 from app.schemas.auth import (
+    AppleLoginRequest,
     LogoutRequest,
     OkResponse,
     RefreshRequest,
@@ -17,11 +21,33 @@ from app.schemas.auth import (
     SmsVerifyRequest,
     TokenPairResponse,
     UserInfo,
+    WechatLoginRequest,
 )
 from app.services import auth as auth_service
 from app.services import sms as sms_service
 
 router = APIRouter(prefix="/auth", tags=["auth"])
+
+
+async def _build_token_pair(db: AsyncSession, user: User, is_new_user: bool) -> TokenPairResponse:
+    """签发令牌对 + 组装登录响应（短信/微信/Apple 三种登录共用）"""
+    access_token, expires_in = auth_service.create_access_token(user.id)
+    refresh_token = await auth_service.issue_refresh_token(db, user.id)
+    has_profile = await db.scalar(
+        select(Profile.user_id).where(Profile.user_id == user.id)
+    ) is not None
+    return TokenPairResponse(
+        access_token=access_token,
+        expires_in=expires_in,
+        refresh_token=refresh_token,
+        is_new_user=is_new_user,
+        user=UserInfo(
+            id=user.id,
+            phone=user.phone,
+            verification=user.verification.value,
+            has_profile=has_profile,
+        ),
+    )
 
 
 @router.post("/sms/send", response_model=SmsSendResponse)
@@ -45,27 +71,43 @@ async def verify_sms_code(body: SmsVerifyRequest, db: DBSession) -> TokenPairRes
     await sms_service.verify_code(phone, body.code)
 
     user, is_new_user = await auth_service.login_or_register_by_phone(db, phone)
-    access_token, expires_in = auth_service.create_access_token(user.id)
-    refresh_token = await auth_service.issue_refresh_token(db, user.id)
-
+    response = await _build_token_pair(db, user, is_new_user)
     await db.commit()
+    return response
 
-    has_profile = await db.scalar(
-        select(Profile.user_id).where(Profile.user_id == user.id)
-    ) is not None
 
-    return TokenPairResponse(
-        access_token=access_token,
-        expires_in=expires_in,
-        refresh_token=refresh_token,
-        is_new_user=is_new_user,
-        user=UserInfo(
-            id=user.id,
-            phone=user.phone,
-            verification=user.verification.value,
-            has_profile=has_profile,
-        ),
-    )
+@router.post("/wechat/login", response_model=TokenPairResponse)
+async def wechat_login(body: WechatLoginRequest, db: DBSession) -> TokenPairResponse:
+    """微信授权 code 换 unionid → 登录/注册（无手机号，verification=pending）"""
+    try:
+        unionid = await wechat_oauth.exchange_code_for_unionid(body.code)
+    except wechat_oauth.WechatAuthError as exc:
+        raise HTTPException(
+            status_code=exc.status_code,
+            detail={"code": "wechat_auth_failed", "message": str(exc)},
+        ) from exc
+
+    user, is_new_user = await auth_service.login_or_register_by_wechat(db, unionid)
+    response = await _build_token_pair(db, user, is_new_user)
+    await db.commit()
+    return response
+
+
+@router.post("/apple/login", response_model=TokenPairResponse)
+async def apple_login(body: AppleLoginRequest, db: DBSession) -> TokenPairResponse:
+    """Apple identity_token 校验 → sub 登录/注册（无手机号，verification=pending）"""
+    try:
+        apple_sub = await apple_auth.verify_identity_token(body.identity_token, body.nonce)
+    except apple_auth.AppleAuthError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail={"code": "invalid_apple_token", "message": str(exc)},
+        ) from exc
+
+    user, is_new_user = await auth_service.login_or_register_by_apple(db, apple_sub)
+    response = await _build_token_pair(db, user, is_new_user)
+    await db.commit()
+    return response
 
 
 @router.post("/refresh", response_model=RefreshResponse)

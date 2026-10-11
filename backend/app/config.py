@@ -57,10 +57,12 @@ class Settings(BaseSettings):
     wechat_app_secret: str = ""
 
     # Apple Sign-In
-    apple_bundle_id: str = "com.banban.app"
+    apple_bundle_id: str = "com.mia369.banban"
     apple_team_id: str = ""
     apple_key_id: str = ""
     apple_private_key_path: str = ""
+    # identity_token 公钥来源；默认 Apple 官方，联调/测试可指向本地 mock JWKS
+    apple_jwks_url: str = "https://appleid.apple.com/auth/keys"
 
     # OSS
     oss_access_key_id: str = ""

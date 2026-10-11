@@ -50,6 +50,13 @@ struct UserInfo: Decodable {
     let hasProfile: Bool
 }
 
+/// POST /auth/apple/login 请求体
+/// nonce 为客户端生成的原值（非哈希），后端比对 token 内 nonce == sha256(原值)
+struct AppleLoginRequest: Encodable {
+    let identityToken: String
+    let nonce: String?
+}
+
 // MARK: - 刷新 / 登出
 
 /// POST /auth/refresh 请求体

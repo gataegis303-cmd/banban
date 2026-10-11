@@ -444,8 +444,7 @@ final class AppState: ObservableObject {
         }
     }
 
-    /// 验证码校验 → 登录/注册，令牌已在仓库层落 Keychain；
-    /// 新用户由调用方引导进实名认证（继续注册流），老用户直接进主流程
+    /// 验证码校验 → 登录/注册，令牌已在仓库层落 Keychain；成功返回 true 由调用方分流
     func verifyCode(_ code: String, phone: String) async -> Bool {
         isVerifying = true
         authError = nil
@@ -457,6 +456,32 @@ final class AppState: ObservableObject {
         } catch {
             authError = (error as? APIError)?.errorDescription ?? error.localizedDescription
             return false
+        }
+    }
+
+    /// Apple 登录：identity_token 交后端验签，令牌已在仓库层落 Keychain；成功返回 true 由调用方分流
+    func loginWithApple(identityToken: String, nonce: String?) async -> Bool {
+        isVerifying = true
+        authError = nil
+        defer { isVerifying = false }
+        do {
+            let pair = try await authRepository.loginWithApple(identityToken: identityToken, nonce: nonce)
+            isNewUser = pair.isNewUser
+            return true
+        } catch {
+            authError = (error as? APIError)?.errorDescription ?? error.localizedDescription
+            return false
+        }
+    }
+
+    /// 登录成功后的分流（短信 / Apple 登录共用）：新用户进实名注册流，老用户直接进主流程
+    func routeAfterLogin() {
+        if isNewUser {
+            // 新注册：栈替换为 login → verifyID，等同原型注册流（codeInput 完成使命出栈）
+            authPath = [.login, .verifyID]
+        } else {
+            // 老用户：进主流程并拉取服务端资料（authPath 在 logout 时重置）
+            enterMainAfterLogin()
         }
     }
 

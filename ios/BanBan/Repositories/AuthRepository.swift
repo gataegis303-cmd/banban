@@ -35,6 +35,16 @@ struct AuthRepository {
         return pair
     }
 
+    /// Apple 登录：identity_token 后端验签后登录/注册；成功后 access/refresh 写入 Keychain
+    func loginWithApple(identityToken: String, nonce: String?) async throws -> TokenPairResponse {
+        let pair: TokenPairResponse = try await client.send(
+            .post("/auth/apple/login", body: AppleLoginRequest(identityToken: identityToken, nonce: nonce))
+        )
+        client.tokens.saveAccess(pair.accessToken)
+        client.tokens.saveRefresh(pair.refreshToken)
+        return pair
+    }
+
     /// 撤销 refresh token（失败静默，本地清令牌即可）
     func logout() async throws {
         if let refresh = client.tokens.readRefresh() {

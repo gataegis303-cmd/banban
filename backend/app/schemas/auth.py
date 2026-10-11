@@ -45,6 +45,18 @@ class RefreshRequest(BaseModel):
     refresh_token: str = Field(min_length=32)
 
 
+class WechatLoginRequest(BaseModel):
+    # 微信 App 授权 SDK 回传的 code；开发降级模式为 dev:{unionid}
+    code: str = Field(min_length=1, max_length=128)
+
+
+class AppleLoginRequest(BaseModel):
+    # ASAuthorizationAppleIDCredential.identityToken（RS256 JWT）
+    identity_token: str = Field(min_length=1, max_length=4096)
+    # 客户端生成的原值 nonce（非哈希），用于与 token 内 sha256(nonce) 比对防重放
+    nonce: str | None = Field(default=None, min_length=8, max_length=128)
+
+
 class RefreshResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"

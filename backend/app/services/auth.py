@@ -81,3 +81,27 @@ async def login_or_register_by_phone(db: AsyncSession, phone: str) -> tuple[User
     db.add(user)
     await db.flush()  # 拿到 user.id 供后续 refresh token 关联
     return user, True
+
+
+async def login_or_register_by_wechat(db: AsyncSession, unionid: str) -> tuple[User, bool]:
+    """微信登录/注册：unionid 唯一定位；新用户无手机号，verification=pending 待补手机验证。"""
+    user = await db.scalar(select(User).where(User.wechat_unionid == unionid))
+    if user is not None:
+        return user, False
+
+    user = User(wechat_unionid=unionid, verification=VerificationLevel.pending)
+    db.add(user)
+    await db.flush()
+    return user, True
+
+
+async def login_or_register_by_apple(db: AsyncSession, apple_sub: str) -> tuple[User, bool]:
+    """Apple 登录/注册：apple_sub 唯一定位；新用户同微信，verification=pending。"""
+    user = await db.scalar(select(User).where(User.apple_sub == apple_sub))
+    if user is not None:
+        return user, False
+
+    user = User(apple_sub=apple_sub, verification=VerificationLevel.pending)
+    db.add(user)
+    await db.flush()
+    return user, True
