@@ -45,6 +45,26 @@ struct AuthRepository {
         return pair
     }
 
+    /// 身份证两要素核验（姓名 + 证号）；通过后服务端推进 verification 状态机
+    func verifyIDCard(realName: String, idNumber: String) async throws -> String {
+        let response: VerificationResponse = try await client.send(
+            .post(
+                "/verification/id-card",
+                body: IDCardVerifyRequest(realName: realName, idNumber: idNumber),
+                requiresAuth: true
+            )
+        )
+        return response.verification
+    }
+
+    /// 人脸活体检测结果提交（开发降级直通；生产接金融级实人认证 SDK）
+    func verifyFace() async throws -> String {
+        let response: VerificationResponse = try await client.send(
+            .post("/verification/face", requiresAuth: true)
+        )
+        return response.verification
+    }
+
     /// 撤销 refresh token（失败静默，本地清令牌即可）
     func logout() async throws {
         if let refresh = client.tokens.readRefresh() {

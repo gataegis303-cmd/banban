@@ -474,6 +474,34 @@ final class AppState: ObservableObject {
         }
     }
 
+    /// 身份证实名：通过返回 true；失败写 authError 由 VerifyIDView 展示
+    func submitIDCard(realName: String, idNumber: String) async -> Bool {
+        isVerifying = true
+        authError = nil
+        defer { isVerifying = false }
+        do {
+            _ = try await authRepository.verifyIDCard(realName: realName, idNumber: idNumber)
+            return true
+        } catch {
+            authError = (error as? APIError)?.errorDescription ?? error.localizedDescription
+            return false
+        }
+    }
+
+    /// 人脸活体：通过返回 true；失败写 authError 由 VerifyIDView 展示
+    func submitFaceVerification() async -> Bool {
+        isVerifying = true
+        authError = nil
+        defer { isVerifying = false }
+        do {
+            _ = try await authRepository.verifyFace()
+            return true
+        } catch {
+            authError = (error as? APIError)?.errorDescription ?? error.localizedDescription
+            return false
+        }
+    }
+
     /// 登录成功后的分流（短信 / Apple 登录共用）：新用户进实名注册流，老用户直接进主流程
     func routeAfterLogin() {
         if isNewUser {

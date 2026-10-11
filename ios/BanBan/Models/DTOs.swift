@@ -81,6 +81,20 @@ struct OkResponse: Decodable {
     let ok: Bool
 }
 
+// MARK: - 实名认证（与后端 app/schemas/verification.py 一一对应）
+
+/// POST /verification/id-card 请求体（身份证二要素核验）
+struct IDCardVerifyRequest: Encodable {
+    let realName: String
+    let idNumber: String
+}
+
+/// POST /verification/id-card、/verification/face 响应
+struct VerificationResponse: Decodable {
+    /// pending / phone_verified / id_verified / face_verified / complete
+    let verification: String
+}
+
 // MARK: - 我的资料（与后端 app/schemas/profile.py 一一对应）
 
 /// birthday 序列化：后端 date 输出 "yyyy-MM-dd" 纯文本，
