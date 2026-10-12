@@ -361,3 +361,54 @@ struct FilterState: Equatable {
     var isDefault: Bool { self == FilterState() }
     var cityDisplay: String { city ?? "全部城市" }
 }
+
+// MARK: - 筛选条件与服务端互转（GET/PUT /me/filter）
+
+extension FilterState {
+    /// 以服务端响应恢复本地筛选；未知枚举值容错回落「不限」，年龄钳制在合法区间
+    init(response: FilterResponse) {
+        self.init()
+        city = response.city
+        ageRange = FilterState.ageBounds.clampedSubrange(
+            lower: response.ageMin, upper: response.ageMax
+        )
+        direction = response.direction.flatMap(MatchDirection.init(rawValue:))
+        partnerStatus = response.partnerStatus.flatMap(PartnerStatus.init(rawValue:))
+        seeking = response.seeking.flatMap(SeekingGender.init(rawValue:))
+        livingMode = response.livingMode.flatMap(LivingMode.init(rawValue:))
+        parentRelation = response.parentRelation.flatMap(ParentRelation.init(rawValue:))
+        financeTrial = response.financeTrial.flatMap(FinanceMode.init(rawValue:))
+        financeFormal = response.financeFormal.flatMap(FormalFinanceMode.init(rawValue:))
+        childIntent = response.childIntent.flatMap(ChildIntent.init(rawValue:))
+        pets = Set(response.pets)
+        noAccept = Set(response.noAccept)
+    }
+
+    /// 服务端请求体（全量覆盖语义）
+    var request: FilterRequest {
+        FilterRequest(
+            city: city,
+            ageMin: ageRange.lowerBound,
+            ageMax: ageRange.upperBound,
+            direction: direction?.rawValue,
+            partnerStatus: partnerStatus?.rawValue,
+            seeking: seeking?.rawValue,
+            livingMode: livingMode?.rawValue,
+            parentRelation: parentRelation?.rawValue,
+            financeTrial: financeTrial?.rawValue,
+            financeFormal: financeFormal?.rawValue,
+            childIntent: childIntent?.rawValue,
+            pets: pets.sorted(),
+            noAccept: noAccept.sorted()
+        )
+    }
+}
+
+extension ClosedRange where Bound == Int {
+    /// 将外部给定的上下界钳制进 ageBounds，且保证 lower ≤ upper（下界取二者较小值兜底）
+    func clampedSubrange(lower: Int, upper: Int) -> ClosedRange<Int> {
+        let lo = max(lowerBound, min(lower, upper))
+        let hi = min(upperBound, max(lower, upper))
+        return lo...hi
+    }
+}

@@ -78,6 +78,8 @@ final class AppState: ObservableObject {
     private let matchRepository: MatchRepository
     /// 会话与消息仓库（同一 APIClient）
     private let chatRepository: ChatRepository
+    /// 筛选条件仓库（同一 APIClient）
+    private let filterRepository: FilterRepository
     /// WebSocket 客户端（聊天实时通道）
     private let socket = WebSocketClient()
     /// 共享 API 客户端（WS URL 派生自 serverRootURL）
@@ -94,6 +96,7 @@ final class AppState: ObservableObject {
         self.userRepository = UserRepository(client: client)
         self.matchRepository = MatchRepository(client: client)
         self.chatRepository = ChatRepository(client: client)
+        self.filterRepository = FilterRepository(client: client)
         // 启动恢复：Keychain 有令牌直接进主流程，并异步拉取服务端资料
         if authRepository.tokens.hasTokens {
             phase = .main
@@ -142,12 +145,16 @@ final class AppState: ObservableObject {
         Task { await bootstrapProfile() }
     }
 
-    /// 拉取服务端资料并全量覆盖本地（启动恢复与登录后共用），随后拉取推荐与会话、连 WS
+    /// 拉取服务端资料并全量覆盖本地（启动恢复与登录后共用），随后拉取筛选、推荐与会话、连 WS
     func bootstrapProfile() async {
         do {
             myProfile = MyProfile(response: try await userRepository.getProfile())
         } catch {
             profileError = (error as? APIError)?.errorDescription ?? error.localizedDescription
+        }
+        // 静默恢复服务端筛选（首次使用时后端惰性建行返回默认值；失败不阻塞主流程）
+        if let restored = try? await filterRepository.fetchFilter() {
+            filter = restored
         }
         await loadRecommendations()
         await loadConversations()
@@ -163,6 +170,20 @@ final class AppState: ObservableObject {
             cardIndex = 0
         } catch {
             homeError = (error as? APIError)?.errorDescription ?? error.localizedDescription
+        }
+    }
+
+    /// 应用筛选：先 PUT 服务端（全量覆盖），成功后更新本地并以新筛选重新拉推荐
+    /// 返回 false 时错误已写入 homeError，调用方留在筛选页展示
+    func applyFilter(_ newFilter: FilterState) async -> Bool {
+        do {
+            try await filterRepository.saveFilter(newFilter)
+            filter = newFilter
+            await loadRecommendations()
+            return true
+        } catch {
+            homeError = (error as? APIError)?.errorDescription ?? error.localizedDescription
+            return false
         }
     }
 

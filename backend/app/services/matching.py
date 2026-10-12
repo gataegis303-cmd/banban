@@ -1,7 +1,11 @@
 #  matching.py
 #  推荐/匹配服务：候选池 → 评分 → 推荐流水；like/skip/block → 双向匹配检测
 #
-#  评分（P5 简化版，P12 接入筛选条件后重写）：
+#  候选池过滤（P12 接入 user_filters）：城市 / 年龄 / 搭伴意图枚举 / 宠物 /
+#  雷区标签全部在 SQL 侧完成（语义见 _filter_conditions）；用户未碰过
+#  /me/filter 时无 user_filters 行，仅做基础排除。
+#
+#  评分（P5 简化版）：
 #  - 同城 +10
 #  - uuid5(我, 对方) 派生 0~3 的稳定伪随机小数打破平局
 #    （同对用户分数恒定，避免每次刷新顺序抖动）
@@ -14,7 +18,8 @@ import uuid
 from datetime import UTC, date, datetime
 
 from fastapi import HTTPException, status
-from sqlalchemy import or_, select, tuple_
+from sqlalchemy import cast, or_, select, tuple_
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -27,7 +32,7 @@ from app.models.matching import (
     Recommendation,
     RecommendationStatus,
 )
-from app.models.profile import Profile, UserPhoto
+from app.models.profile import Profile, UserFilter, UserPhoto
 from app.models.user import User
 from app.schemas.matching import (
     LikeActionResponse,
@@ -62,13 +67,55 @@ def score_pair(me_id: uuid.UUID, me_city: str, target_id: uuid.UUID, target_city
     return score + jitter / 0xFFFFFFFF * 3
 
 
+def _filter_conditions(flt: UserFilter) -> list:
+    """user_filters 行 → 候选池 SQL 条件（全部在 SQL 侧求值，条数不受 Python 过滤削减）。
+
+    - 枚举字段值即 profiles 列存储值（iOS 中文 rawValue 直通），None = 不限
+    - 年龄走服务端权威 User.age；未填生日 age 为 NULL，被 BETWEEN 自然排除
+    - pets 要求对方包含所选全部（JSONB @>）
+    - no_accept 仅过滤有结构化字段可查的标签（养宠/吸烟/饮酒/与父母同住）；
+      主观特质（妈宝/花心等）与异地恋/工作狂无对应列，忽略
+    """
+    conditions: list = []
+    if flt.city:
+        conditions.append(Profile.city == flt.city)
+    conditions.append(User.age >= flt.age_min)
+    conditions.append(User.age <= flt.age_max)
+    for column, value in (
+        (Profile.direction, flt.direction),
+        (Profile.partner_status, flt.partner_status),
+        (Profile.seeking, flt.seeking),
+        (Profile.living_mode, flt.living_mode),
+        (Profile.parent_relation, flt.parent_relation),
+        (Profile.finance_trial, flt.finance_trial),
+        (Profile.finance_formal, flt.finance_formal),
+        (Profile.child_intent, flt.child_intent),
+    ):
+        if value:
+            conditions.append(column == value)
+    if flt.pets:
+        conditions.append(Profile.pets.contains(flt.pets))
+    if "养宠" in flt.no_accept:
+        # 对方不能养宠：pets 为空或仅为 ["无"]
+        conditions.append(Profile.pets.contained_by(cast('["无"]', JSONB)))
+    if "吸烟" in flt.no_accept:
+        # is_distinct_from 对 NULL 安全：未填吸烟的候选不会被误杀
+        conditions.append(Profile.smoking.is_distinct_from("是"))
+    if "饮酒" in flt.no_accept:
+        conditions.append(Profile.drinking.is_distinct_from("是"))
+    if "与父母同住" in flt.no_accept:
+        conditions.append(Profile.parent_relation.is_distinct_from("与其同住"))
+    return conditions
+
+
 async def list_recommendations(
     db: AsyncSession, user: User, limit: int = DEFAULT_RECOMMEND_LIMIT
 ) -> RecommendationListOut:
-    """候选池：排除自己 / 已行动过（likes 任意方向）/ block 了我 / 已匹配的用户。
+    """候选池：筛选条件（user_filters）+ 排除自己 / 已行动过（likes 任意方向）/
+    block 了我 / 已匹配的用户。
 
     join profiles 天然过滤未填资料的用户（city/nickname 全空无推荐意义）；
-    取池后 Python 层评分排序（原型阶段池子小，P12 优化 SQL 侧排序）。
+    取池后 Python 层评分排序（原型阶段池子小）。
     """
     me_profile = await db.get(Profile, user.id)
     me_city = me_profile.city if me_profile else ""
@@ -80,17 +127,23 @@ async def list_recommendations(
     matched_ids = select(Match.user_b_id).where(Match.user_a_id == user.id).union(
         select(Match.user_a_id).where(Match.user_b_id == user.id)
     )
+
+    conditions: list = [
+        User.id != user.id,
+        User.id.not_in(acted),
+        User.id.not_in(blocked_me),
+        User.id.not_in(matched_ids),
+    ]
+    flt = await db.get(UserFilter, user.id)
+    if flt is not None:
+        conditions.extend(_filter_conditions(flt))
+
     rows = (
         await db.execute(
             select(User, Profile)
             .join(Profile, Profile.user_id == User.id)
-            .where(
-                User.id != user.id,
-                User.id.not_in(acted),
-                User.id.not_in(blocked_me),
-                User.id.not_in(matched_ids),
-            )
-            .order_by(User.id)  # 稳定取池，真实召回策略 P12 再做
+            .where(*conditions)
+            .order_by(User.id)  # 稳定取池，真实召回策略后续再做
             .limit(limit)
         )
     ).all()

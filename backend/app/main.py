@@ -12,7 +12,16 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from app.adapters import oss
 from app.config import settings
-from app.routers import auth, chat, health, matches, profile, recommendations, verification
+from app.routers import (
+    auth,
+    chat,
+    filters,
+    health,
+    matches,
+    profile,
+    recommendations,
+    verification,
+)
 from app.ws import handler as ws_handler
 
 
@@ -72,6 +81,7 @@ async def unified_http_error_handler(request: Request, exc: StarletteHTTPExcepti
 app.include_router(health.router, prefix="/api/v1")
 app.include_router(auth.router, prefix="/api/v1")
 app.include_router(profile.router, prefix="/api/v1")
+app.include_router(filters.router, prefix="/api/v1")
 app.include_router(recommendations.router, prefix="/api/v1")
 app.include_router(matches.router, prefix="/api/v1")
 app.include_router(chat.router, prefix="/api/v1")

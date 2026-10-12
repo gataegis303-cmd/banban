@@ -5,6 +5,7 @@ struct FilterView: View {
     @EnvironmentObject var appState: AppState
     @Environment(\.dismiss) private var dismiss
     @State private var draft = FilterState()
+    @State private var isApplying = false
 
     var body: some View {
         ZStack {
@@ -66,6 +67,18 @@ struct FilterView: View {
         }
         .onAppear {
             draft = appState.filter
+        }
+        // sheet 内自挂错误提示（HomeView 的 alert 被 sheet 遮挡）
+        .alert(
+            "提示",
+            isPresented: Binding(
+                get: { appState.homeError != nil },
+                set: { if !$0 { appState.homeError = nil } }
+            )
+        ) {
+            Button("好的", role: .cancel) {}
+        } message: {
+            Text(appState.homeError ?? "")
         }
     }
 
@@ -131,13 +144,24 @@ struct FilterView: View {
             Rectangle()
                 .fill(Color.banbanBorder.opacity(0.6))
                 .frame(height: 0.5)
-            PrimaryButton(title: "显示 \(MockData.filterResultCount(draft)) 位结果") {
-                appState.filter = draft
-                dismiss()
+            PrimaryButton(title: isApplying ? "应用中…" : "应用筛选") {
+                apply()
             }
+            .disabled(isApplying)
             .padding(20)
         }
         .background(Color.banbanCard)
+    }
+
+    /// PUT 服务端 + 重拉推荐；成功才 dismiss，失败留在筛选页由 alert 提示
+    private func apply() {
+        guard !isApplying else { return }
+        isApplying = true
+        Task {
+            let success = await appState.applyFilter(draft)
+            isApplying = false
+            if success { dismiss() }
+        }
     }
 }
 

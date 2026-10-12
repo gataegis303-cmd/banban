@@ -81,6 +81,42 @@ struct OkResponse: Decodable {
     let ok: Bool
 }
 
+// MARK: - 筛选条件（与后端 app/schemas/filter.py 一一对应）
+
+/// PUT /me/filter 请求体（全量覆盖；nil / 空集合 = 不限）
+struct FilterRequest: Encodable {
+    var city: String?
+    var ageMin: Int
+    var ageMax: Int
+    var direction: String?
+    var partnerStatus: String?
+    var seeking: String?
+    var livingMode: String?
+    var parentRelation: String?
+    var financeTrial: String?
+    var financeFormal: String?
+    var childIntent: String?
+    var pets: [String]
+    var noAccept: [String]
+}
+
+/// GET /me/filter 响应（与请求体同构）
+struct FilterResponse: Decodable {
+    var city: String?
+    var ageMin: Int
+    var ageMax: Int
+    var direction: String?
+    var partnerStatus: String?
+    var seeking: String?
+    var livingMode: String?
+    var parentRelation: String?
+    var financeTrial: String?
+    var financeFormal: String?
+    var childIntent: String?
+    var pets: [String]
+    var noAccept: [String]
+}
+
 // MARK: - 实名认证（与后端 app/schemas/verification.py 一一对应）
 
 /// POST /verification/id-card 请求体（身份证二要素核验）
