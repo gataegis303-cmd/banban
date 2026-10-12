@@ -76,4 +76,24 @@ struct UserRepository {
             Endpoint.put("/me/photos/reorder", body: PhotoReorderRequest(photoIds: photoIds), requiresAuth: true)
         )
     }
+
+    // MARK: - APNs 设备令牌
+
+    /// 上报 APNs 设备令牌（幂等；服务端按 token 全局唯一 upsert，换账号登录时改绑）
+    func registerDeviceToken(token: String) async throws {
+        try await client.sendVoid(
+            Endpoint.put(
+                "/me/device-token",
+                body: DeviceTokenRequest(token: token, platform: "ios"),
+                requiresAuth: true
+            )
+        )
+    }
+
+    /// 注销设备令牌（登出时调用）：凭 token 值删除、无需 Bearer（登出先清 Keychain，带鉴权必 401）
+    func deleteDeviceToken(token: String) async throws {
+        try await client.sendVoid(
+            Endpoint.delete("/me/device-token?token=\(token)", requiresAuth: false)
+        )
+    }
 }

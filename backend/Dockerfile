@@ -8,9 +8,9 @@ COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /usr/local/bin/
 
 WORKDIR /app
 
-# 先复制依赖清单，利用 Docker 层缓存
-COPY pyproject.toml ./
-RUN uv sync --no-dev --no-install-project
+# 先复制依赖清单（uv.lock 锁定版本保证可复现构建），利用 Docker 层缓存
+COPY pyproject.toml uv.lock ./
+RUN uv sync --no-dev --no-install-project --frozen
 
 # 复制应用代码
 COPY . .

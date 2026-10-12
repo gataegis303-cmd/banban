@@ -89,6 +89,8 @@ final class AppState: ObservableObject {
 
     /// 资料 bootstrap / 保存失败的提示文案（视图层展示后置 nil 复位）
     @Published var profileError: String?
+    /// 本机 APNs device token hex（登出时凭此注销服务端绑定）
+    private var deviceToken: String?
 
     init(client: APIClient = APIClient()) {
         self.client = client
@@ -159,6 +161,17 @@ final class AppState: ObservableObject {
         await loadRecommendations()
         await loadConversations()
         connectChat()
+        registerPushNotifications()
+    }
+
+    /// 注册 APNs 推送：授权请求 → 系统回调回传 token → 上报服务端（失败静默，不阻塞主流程）
+    private func registerPushNotifications() {
+        NotificationManager.shared.onToken = { [weak self] hex in
+            guard let self else { return }
+            deviceToken = hex
+            Task { try? await self.userRepository.registerDeviceToken(token: hex) }
+        }
+        NotificationManager.shared.register()
     }
 
     /// 拉取后端推荐列表并重置卡片游标（耗尽后可再次调用刷新）
@@ -535,8 +548,12 @@ final class AppState: ObservableObject {
     }
 
     func logout() {
-        // 异步撤销服务端 refresh token（失败不影响本地登出）
+        // 异步撤销服务端 refresh token 与推送令牌绑定（均失败不影响本地登出）
+        if let token = deviceToken {
+            Task { try? await userRepository.deleteDeviceToken(token: token) }
+        }
         Task { try? await authRepository.logout() }
+        deviceToken = nil
         authRepository.tokens.clear()
         myProfile = MyProfile()
         draft = ProfileDraft()

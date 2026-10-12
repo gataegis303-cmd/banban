@@ -41,6 +41,11 @@ class Settings(BaseSettings):
     sms_ip_daily_limit: int = 20           # 同 IP 每日上限
     sms_code_max_attempts: int = 5         # 单个验证码最大尝试次数
 
+    # 通用 IP 限流（固定窗口，按端点 scope 区分；单位：次/分钟）
+    rate_limit_verify_per_minute: int = 10    # /auth/sms/verify（防验证码爆破）
+    rate_limit_refresh_per_minute: int = 30   # /auth/refresh
+    rate_limit_oauth_per_minute: int = 10     # /auth/wechat/login、/auth/apple/login
+
     # 阿里云短信
     aliyun_sms_access_key_id: str = ""
     aliyun_sms_access_key_secret: str = ""
@@ -63,6 +68,12 @@ class Settings(BaseSettings):
     apple_private_key_path: str = ""
     # identity_token 公钥来源；默认 Apple 官方，联调/测试可指向本地 mock JWKS
     apple_jwks_url: str = "https://appleid.apple.com/auth/keys"
+
+    # APNs 离线推送（team/key 未配置时降级 DevMock，推送内容打日志）
+    apns_team_id: str = ""
+    apns_key_id: str = ""
+    apns_private_key_path: str = ""
+    apns_use_sandbox: bool = True  # True 走 sandbox（api.sandbox.push.apple.com）
 
     # OSS
     oss_access_key_id: str = ""

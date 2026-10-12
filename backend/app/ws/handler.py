@@ -19,7 +19,7 @@ from app.deps import AsyncSessionFactory
 from app.models.chat import Conversation
 from app.models.user import User
 from app.schemas.chat import SendMessageIn
-from app.services import chat, presence
+from app.services import chat, presence, push
 from app.ws import events
 from app.ws.hub import hub
 
@@ -149,6 +149,8 @@ async def _handle_message(
             "conversation_id": str(conversation_id),
             **payload,
         })
+        # 对方离线时 APNs 离线推送（服务内先判在线态，在线则跳过）
+        await push.push_new_message(db, conversation_id, user_id, content)
 
 
 async def _handle_typing(db: AsyncSession, user_id: uuid.UUID, event: dict) -> None:

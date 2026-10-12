@@ -31,6 +31,13 @@ SocialBoundary = Literal["保持独立社交", "共同朋友圈", "可商量"]
 ParentRelation = Literal["与其同住", "同城居住", "脱离关系", "父母双亡"]
 
 
+class DeviceTokenIn(BaseModel):
+    """APNs 设备令牌上报（PUT /me/device-token）"""
+
+    token: str = Field(min_length=10, max_length=200, description="APNs device token（hex）")
+    platform: str = Field(default="ios", max_length=10)
+
+
 class PhotoOut(BaseModel):
     order: int = Field(ge=0, le=5, description="展示顺序 0-5")
     url: str = Field(description="图片访问 URL（未上传完成时为空串）")

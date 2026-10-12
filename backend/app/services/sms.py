@@ -1,16 +1,18 @@
 #  sms.py
-#  短信验证码服务：生成 / 限流（60s 间隔、日上限、IP 上限）/ 存取 / 校验
+#  短信验证码服务：生成 / 限流（60s 间隔、自然日上限、IP 上限）/ 存取 / 校验
 #  全部热数据存 Redis；key 统一加 banban: 前缀避免与其他服务混用
 
 import logging
 import random
 import re
+from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
 
-from fastapi import HTTPException, Request, status
+from fastapi import HTTPException, status
 
 from app.adapters.aliyun_sms import SmsSendError, build_sms_sender
 from app.config import settings
-from app.deps import redis_client
+from app.deps import client_ip, redis_client
 
 logger = logging.getLogger("banban.sms")
 
@@ -22,8 +24,20 @@ KEY_PREFIX = "banban:sms"
 # 发送渠道：模块加载时按配置选定（配了 AK → 阿里云，否则 dev mock）
 _sender = build_sms_sender()
 
-# 日上限窗口（简化为 24h 滑动，P13 限流加固时再按自然日切分）
-_DAILY_WINDOW_SECONDS = settings.sms_code_ttl_seconds * 3
+# 日窗口时区：按东八区自然日切分（0 点归零重新计数）
+_DAILY_TZ = ZoneInfo("Asia/Shanghai")
+
+
+def _today_key_suffix() -> str:
+    """自然日窗口键后缀（YYYYMMDD）+ TTL 双保险：即使 TTL 因故缺失，跨日也换新键"""
+    return datetime.now(_DAILY_TZ).strftime("%Y%m%d")
+
+
+def _seconds_until_midnight() -> int:
+    """距次日 0 点（东八区）的秒数，作为日窗口计数键的 TTL"""
+    now = datetime.now(_DAILY_TZ)
+    midnight = (now + timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0)
+    return max(1, int((midnight - now).total_seconds()))
 
 
 def validate_phone(phone: str) -> str:
@@ -36,21 +50,13 @@ def validate_phone(phone: str) -> str:
     return phone
 
 
-def client_ip(request: Request) -> str:
-    """取客户端真实 IP：nginx 反代场景优先读 X-Forwarded-For 首段"""
-    forwarded = request.headers.get("x-forwarded-for")
-    if forwarded:
-        return forwarded.split(",")[0].strip()
-    return request.client.host if request.client else "unknown"
-
-
 async def send_code(phone: str, ip: str) -> int:
     """发送验证码。返回重发冷却秒数；触发限流抛 429，渠道失败抛 502。
 
-    限流键：
-    - {p}:cd:{phone}     SET NX EX 60 → 60s 重发间隔
-    - {p}:daily:{phone}  INCR + EXPIRE → 每日上限
-    - {p}:ip:{ip}        INCR + EXPIRE → IP 每日上限
+    限流键（daily/ip 均按东八区自然日切分）：
+    - {p}:cd:{phone}              SET NX EX 60 → 60s 重发间隔
+    - {p}:daily:{phone}:{date}    INCR + EXPIRE → 每日上限
+    - {p}:ip:{ip}:{date}          INCR + EXPIRE → IP 每日上限
     """
     p = KEY_PREFIX
 
@@ -68,16 +74,16 @@ async def send_code(phone: str, ip: str) -> int:
             },
         )
 
-    # 手机号每日上限
-    daily_count = await _incr_with_expire(f"{p}:daily:{phone}")
+    # 手机号每日上限（自然日窗口）
+    daily_count = await _incr_with_expire(f"{p}:daily:{phone}:{_today_key_suffix()}")
     if daily_count > settings.sms_daily_limit:
         raise HTTPException(
             status_code=status.HTTP_429_TOO_MANY_REQUESTS,
             detail={"code": "sms_daily_limit", "message": "今日验证码发送次数已达上限"},
         )
 
-    # IP 每日上限
-    ip_count = await _incr_with_expire(f"{p}:ip:{ip}")
+    # IP 每日上限（自然日窗口）
+    ip_count = await _incr_with_expire(f"{p}:ip:{ip}:{_today_key_suffix()}")
     if ip_count > settings.sms_ip_daily_limit:
         raise HTTPException(
             status_code=status.HTTP_429_TOO_MANY_REQUESTS,
@@ -140,8 +146,8 @@ async def verify_code(phone: str, code: str) -> None:
 
 
 async def _incr_with_expire(key: str) -> int:
-    """INCR 并在首次创建时补 EXPIRE"""
+    """INCR 并在首次创建时补 EXPIRE（TTL 到次日 0 点，自然日归零）"""
     count = await redis_client.incr(key)
     if count == 1:
-        await redis_client.expire(key, _DAILY_WINDOW_SECONDS)
+        await redis_client.expire(key, _seconds_until_midnight())
     return count

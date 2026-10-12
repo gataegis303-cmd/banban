@@ -3,13 +3,16 @@
 
 import uuid
 
-from fastapi import APIRouter, HTTPException, Request, Response, status
-from sqlalchemy import select
+from fastapi import APIRouter, HTTPException, Query, Request, Response, status
+from sqlalchemy import delete, func, select
+from sqlalchemy.dialects.postgresql import insert as pg_insert
 
 from app.adapters import oss
 from app.deps import CurrentUser, DBSession
 from app.models.profile import UserPhoto
+from app.models.user import DeviceToken
 from app.schemas.profile import (
+    DeviceTokenIn,
     PhotoOut,
     PhotoReorderRequest,
     PhotoUploadRequest,
@@ -175,3 +178,42 @@ async def reorder_photos(
 
     photos = await profile_service.list_photos(db, user.id)
     return [PhotoOut(order=p.sort_order, url=p.url) for p in photos]
+
+
+# ── APNs 设备令牌（离线推送）──────────────────────────────────
+
+
+@router.put("/device-token", status_code=204)
+async def register_device_token(
+    body: DeviceTokenIn, user: CurrentUser, db: DBSession
+) -> Response:
+    """上报 APNs 设备令牌（幂等）。
+
+    token 全局唯一：同一设备换账号登录时改绑新账号，
+    保证离线推送只发给当前持有该设备的一方。
+    """
+    stmt = pg_insert(DeviceToken).values(
+        user_id=user.id, token=body.token, platform=body.platform,
+    ).on_conflict_do_update(
+        index_elements=["token"],
+        set_={"user_id": user.id, "platform": body.platform, "updated_at": func.now()},
+    )
+    await db.execute(stmt)
+    await db.commit()
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+@router.delete("/device-token", status_code=204)
+async def delete_device_token(
+    db: DBSession,
+    token: str = Query(description="要注销的 APNs device token"),
+) -> Response:
+    """注销设备令牌（登出时调用）。
+
+    凭 token 值删除而不要求 Bearer：登出流程先清 Keychain 再发注销请求，
+    若要求鉴权必然 401。token 本身即设备凭据（仅持有设备的 App 可知），
+    未知 token 同样返回 204，不泄露存在性。
+    """
+    await db.execute(delete(DeviceToken).where(DeviceToken.token == token))
+    await db.commit()
+    return Response(status_code=status.HTTP_204_NO_CONTENT)

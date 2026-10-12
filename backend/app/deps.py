@@ -6,7 +6,7 @@ from collections.abc import AsyncGenerator
 from typing import Annotated
 
 import redis.asyncio as aioredis
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import JWTError
 from jose import jwt as jose_jwt
@@ -32,6 +32,14 @@ AsyncSessionFactory = async_sessionmaker(
 
 # Redis 客户端（验证码/限流/在线态）；decode_responses 让读写直接用 str
 redis_client = aioredis.from_url(settings.redis_url, decode_responses=True)
+
+
+def client_ip(request: Request) -> str:
+    """取客户端真实 IP：nginx 反代场景优先读 X-Forwarded-For 首段"""
+    forwarded = request.headers.get("x-forwarded-for")
+    if forwarded:
+        return forwarded.split(",")[0].strip()
+    return request.client.host if request.client else "unknown"
 
 
 async def get_db() -> AsyncGenerator[AsyncSession, None]:

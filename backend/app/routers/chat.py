@@ -12,7 +12,7 @@ from app.schemas.chat import (
     MessageOut,
     SendMessageIn,
 )
-from app.services import chat
+from app.services import chat, push
 
 router = APIRouter(prefix="/conversations", tags=["conversations"])
 
@@ -42,7 +42,10 @@ async def send_message(
     db: DBSession,
 ) -> MessageOut:
     """HTTP 兜底发消息（WS 为主通道）"""
-    return await chat.send_message(db, user.id, conversation_id, data)
+    message = await chat.send_message(db, user.id, conversation_id, data)
+    # 对方离线时 APNs 离线推送（服务内先判在线态，在线则跳过）
+    await push.push_new_message(db, conversation_id, user.id, message.content)
+    return message
 
 
 @router.post("/{conversation_id}/read", status_code=204)

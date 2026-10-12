@@ -297,6 +297,14 @@ struct PhotoReorderRequest: Encodable {
     let photoIds: [String]
 }
 
+// MARK: - 设备令牌（P13 APNs 离线推送）
+
+/// PUT /me/device-token 请求体：APNs 设备令牌上报（token 全局唯一，换账号登录时服务端改绑）
+struct DeviceTokenRequest: Encodable {
+    let token: String
+    let platform: String
+}
+
 // MARK: - 推荐 / 匹配（P6）
 
 /// 用户投影（后端 project_user_profile 输出，键名对齐 iOS UserProfile）；

@@ -1,7 +1,7 @@
 #  auth.py
 #  认证路由：短信发送/验证登录 + 微信/Apple OAuth 登录 + refresh 换新 + logout 撤销
 
-from fastapi import APIRouter, HTTPException, Request, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -25,8 +25,20 @@ from app.schemas.auth import (
 )
 from app.services import auth as auth_service
 from app.services import sms as sms_service
+from app.services.rate_limit import rate_limit
 
 router = APIRouter(prefix="/auth", tags=["auth"])
+
+# P13 限流加固：公共免认证端点统一加 IP 固定窗口限流（sms/send 已有细粒度限流，不重复）
+_verify_limiter = Depends(rate_limit(
+    "sms_verify", limit=settings.rate_limit_verify_per_minute, window_seconds=60,
+))
+_refresh_limiter = Depends(rate_limit(
+    "auth_refresh", limit=settings.rate_limit_refresh_per_minute, window_seconds=60,
+))
+_oauth_limiter = Depends(rate_limit(
+    "oauth_login", limit=settings.rate_limit_oauth_per_minute, window_seconds=60,
+))
 
 
 async def _build_token_pair(db: AsyncSession, user: User, is_new_user: bool) -> TokenPairResponse:
@@ -64,7 +76,11 @@ async def send_sms_code(body: SmsSendRequest, request: Request) -> SmsSendRespon
     return SmsSendResponse(cooldown=cooldown, debug_code=debug_code)
 
 
-@router.post("/sms/verify", response_model=TokenPairResponse)
+@router.post(
+    "/sms/verify",
+    response_model=TokenPairResponse,
+    dependencies=[_verify_limiter],
+)
 async def verify_sms_code(body: SmsVerifyRequest, db: DBSession) -> TokenPairResponse:
     """验证码校验 → 登录/注册 → 签发 access + refresh"""
     phone = sms_service.validate_phone(body.phone)
@@ -76,7 +92,11 @@ async def verify_sms_code(body: SmsVerifyRequest, db: DBSession) -> TokenPairRes
     return response
 
 
-@router.post("/wechat/login", response_model=TokenPairResponse)
+@router.post(
+    "/wechat/login",
+    response_model=TokenPairResponse,
+    dependencies=[_oauth_limiter],
+)
 async def wechat_login(body: WechatLoginRequest, db: DBSession) -> TokenPairResponse:
     """微信授权 code 换 unionid → 登录/注册（无手机号，verification=pending）"""
     try:
@@ -93,7 +113,11 @@ async def wechat_login(body: WechatLoginRequest, db: DBSession) -> TokenPairResp
     return response
 
 
-@router.post("/apple/login", response_model=TokenPairResponse)
+@router.post(
+    "/apple/login",
+    response_model=TokenPairResponse,
+    dependencies=[_oauth_limiter],
+)
 async def apple_login(body: AppleLoginRequest, db: DBSession) -> TokenPairResponse:
     """Apple identity_token 校验 → sub 登录/注册（无手机号，verification=pending）"""
     try:
@@ -110,7 +134,11 @@ async def apple_login(body: AppleLoginRequest, db: DBSession) -> TokenPairRespon
     return response
 
 
-@router.post("/refresh", response_model=RefreshResponse)
+@router.post(
+    "/refresh",
+    response_model=RefreshResponse,
+    dependencies=[_refresh_limiter],
+)
 async def refresh_access_token(body: RefreshRequest, db: DBSession) -> RefreshResponse:
     """refresh token 换新 access（不轮换 refresh；撤销只能通过 logout）"""
     row = await auth_service.get_valid_refresh_token(db, body.refresh_token)

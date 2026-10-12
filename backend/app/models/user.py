@@ -112,3 +112,17 @@ class RefreshToken(UUIDPKMixin, Base):
     revoked: Mapped[bool] = mapped_column(
         Boolean, default=False, server_default=text("false"), nullable=False,
     )
+
+
+# ── device_tokens 表（APNs 推送令牌，token 全局唯一、换账号登录时改绑）──
+
+class DeviceToken(UUIDPKMixin, TimestampMixin, Base):
+    __tablename__ = "device_tokens"
+
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), index=True, nullable=False,
+    )
+    token: Mapped[str] = mapped_column(String(200), unique=True, index=True, nullable=False)
+    platform: Mapped[str] = mapped_column(
+        String(10), default="ios", server_default="ios", nullable=False,
+    )

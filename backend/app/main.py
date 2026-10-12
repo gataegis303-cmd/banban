@@ -2,6 +2,7 @@
 #  FastAPI 应用入口：装配中间件、路由与统一错误体
 
 from contextlib import asynccontextmanager
+import logging
 
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
@@ -23,6 +24,9 @@ from app.routers import (
     verification,
 )
 from app.ws import handler as ws_handler
+
+# 应用日志基础配置：uvicorn 只接管自己的 logger，应用层 INFO 日志（如 APNs DevMock）需显式开启
+logging.basicConfig(level=logging.INFO)
 
 
 @asynccontextmanager
