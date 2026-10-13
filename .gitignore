@@ -13,3 +13,7 @@ xcuserdata/
 
 # 后端本地数据（照片 dev mock 存储）
 backend/data/
+
+# 秘钥与环境配置（绝不入库）
+.env
+*.p8
