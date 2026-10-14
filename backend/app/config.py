@@ -13,10 +13,16 @@ class Settings(BaseSettings):
 
     # 应用
     app_env: str = "development"
-    app_debug: bool = True
+    # 安全默认 False：debug 开启会泄露验证码响应体 / SQL echo PII / 微信与实名 dev 降级，
+    # 开发环境须在 .env 显式声明 APP_DEBUG=true
+    app_debug: bool = False
     app_host: str = "0.0.0.0"
     app_port: int = 8000
     app_secret_key: str = "change-me-to-a-64-char-random-string"
+    # 反向代理链上可信代理的层数（0 = 不信任 X-Forwarded-For，按 socket 直连 IP 计）
+    # Nginx 单层反代设 1：取 XFF 倒数第 1 段（最近一跳代理写入的真实客户端 IP），
+    # 防止客户端伪造 XFF 头绕过 IP 限流（审查 F3）
+    app_trusted_proxy_count: int = 0
 
     # 数据库
     database_url: str = (
@@ -89,3 +95,10 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
+
+# 安全 fail-fast：非 debug（生产）模式禁止默认 secret_key，防 JWT 伪造（审查 F2）
+if not settings.app_debug and settings.app_secret_key == "change-me-to-a-64-char-random-string":
+    raise RuntimeError(
+        "APP_SECRET_KEY 未配置：非 debug 模式禁止使用默认值，"
+        "请在 .env 中设置随机密钥（或开发环境显式声明 APP_DEBUG=true）"
+    )

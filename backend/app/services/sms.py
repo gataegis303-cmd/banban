@@ -3,8 +3,8 @@
 #  全部热数据存 Redis；key 统一加 banban: 前缀避免与其他服务混用
 
 import logging
-import random
 import re
+import secrets
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
@@ -12,7 +12,10 @@ from fastapi import HTTPException, status
 
 from app.adapters.aliyun_sms import SmsSendError, build_sms_sender
 from app.config import settings
-from app.deps import client_ip, redis_client
+from app.deps import (  # noqa: F401  client_ip 经本模块转发给 routers/auth.py 使用
+    client_ip,
+    redis_client,
+)
 
 logger = logging.getLogger("banban.sms")
 
@@ -90,7 +93,8 @@ async def send_code(phone: str, ip: str) -> int:
             detail={"code": "sms_ip_limit", "message": "当前网络发送次数已达上限"},
         )
 
-    code = f"{random.randint(0, 999999):06d}"
+    # secrets：密码安全随机源（random 的 Mersenne Twister 可预测，审查 F16）
+    code = f"{secrets.randbelow(1_000_000):06d}"
     try:
         await _sender.send_code(phone, code)
     except SmsSendError as exc:
@@ -107,8 +111,13 @@ async def send_code(phone: str, ip: str) -> int:
     pipe.delete(f"{p}:att:{phone}")
     await pipe.execute()
 
-    logger.info("验证码已发送 phone=%s ip=%s", phone, ip)
+    logger.info("验证码已发送 phone=%s ip=%s", _mask_phone(phone), ip)
     return settings.sms_send_cooldown_seconds
+
+
+def _mask_phone(phone: str) -> str:
+    """日志用手机号打码：138****1234（PII 最小化，审查 F6）"""
+    return f"{phone[:3]}****{phone[-4:]}" if len(phone) >= 7 else "***"
 
 
 async def verify_code(phone: str, code: str) -> None:

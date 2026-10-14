@@ -37,7 +37,7 @@ def _check_id_number(id_number: str) -> None:
     age = today.year - birth.year - ((today.month, today.day) < (birth.month, birth.day))
     if age < 18:
         raise RealPersonError("未满 18 周岁，无法完成实名认证")
-    checksum = sum(int(d) * w for d, w in zip(id_number[:17], _ID_WEIGHTS))
+    checksum = sum(int(d) * w for d, w in zip(id_number[:17], _ID_WEIGHTS, strict=True))
     if _ID_CHECK_CODES[checksum % 11] != id_number[17].upper():
         raise RealPersonError("身份证号校验位不正确")
 

@@ -345,6 +345,16 @@ async def _project_batch(
         p.user_id: p
         for p in (await db.scalars(select(Profile).where(Profile.user_id.in_(target_ids)))).all()
     }
+    # 注册后未填资料的用户无 profiles 行：内存空对象兜底（不落库），
+    # 字段对齐空行落库后的状态（非空约束列为空串/空集合，其余为 NULL）
+    for pid in target_ids:
+        profiles.setdefault(
+            pid,
+            Profile(
+                user_id=pid, nickname="", city="", height="", education="",
+                occupation="", income="", pets=[], no_accept=[],
+            ),
+        )
     photos_by_user: dict[uuid.UUID, list[UserPhoto]] = {}
     for photo in (
         await db.scalars(

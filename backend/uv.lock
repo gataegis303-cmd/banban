@@ -438,6 +438,7 @@ dependencies = [
 
 [package.optional-dependencies]
 dev = [
+    { name = "fakeredis" },
     { name = "httpx" },
     { name = "pytest" },
     { name = "pytest-asyncio" },
@@ -450,6 +451,7 @@ requires-dist = [
     { name = "alibabacloud-dysmsapi20170525", specifier = ">=3.1.0" },
     { name = "asyncpg", specifier = ">=0.30.0" },
     { name = "bcrypt", specifier = "<4.1" },
+    { name = "fakeredis", marker = "extra == 'dev'", specifier = ">=2.26.0" },
     { name = "fastapi", specifier = ">=0.115.0" },
     { name = "httpx", marker = "extra == 'dev'", specifier = ">=0.27.0" },
     { name = "httpx", extras = ["http2"], specifier = ">=0.27.0" },
@@ -824,6 +826,19 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/25/ca/8de7744cb3bc966c85430ca2d0fcaeea872507c6a4cf6e007f7fe269ed9d/ecdsa-0.19.2.tar.gz", hash = "sha256:62635b0ac1ca2e027f82122b5b81cb706edc38cd91c63dda28e4f3455a2bf930", size = 202432, upload-time = "2026-03-26T09:58:17.675Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/51/79/119091c98e2bf49e24ed9f3ae69f816d715d2904aefa6a2baa039a2ba0b0/ecdsa-0.19.2-py2.py3-none-any.whl", hash = "sha256:840f5dc5e375c68f36c1a7a5b9caad28f95daa65185c9253c0c08dd952bb7399", size = 150818, upload-time = "2026-03-26T09:58:15.808Z" },
+]
+
+[[package]]
+name = "fakeredis"
+version = "2.39.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "redis" },
+    { name = "sortedcontainers" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/2f/27/3ed3eee5e5a929345c37024b814a70f6e2452ffdab77a2680c2ebba3614a/fakeredis-2.39.0.tar.gz", hash = "sha256:e89c3410f290330042638ff5cca3e22788fa267dcaf28a64b4f483e14577208d", size = 301722, upload-time = "2026-10-01T12:35:19.404Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/35/ca/8bf657139922808196e6480ec6ed94008897e23d603abd5b27538cfdf811/fakeredis-2.39.0-py3-none-any.whl", hash = "sha256:acd1450575259634db2942d5bae93e383aac32bb9968aab29fe7b0c2ab880bb8", size = 186508, upload-time = "2026-10-01T12:35:17.899Z" },
 ]
 
 [[package]]
@@ -2008,6 +2023,15 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/94/e7/b2c673351809dca68a0e064b6af791aa332cf192da575fd474ed7d6f16a2/six-1.17.0.tar.gz", hash = "sha256:ff70335d468e7eb6ec65b95b99d3a2836546063f63acc5171de367e834932a81", size = 34031, upload-time = "2024-12-04T17:35:28.174Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/b7/ce/149a00dd41f10bc29e5921b496af8b574d8413afcd5e30dfa0ed46c2cc5e/six-1.17.0-py2.py3-none-any.whl", hash = "sha256:4721f391ed90541fddacab5acf947aa0d3dc7d27b2e1e8eda2be8970586c3274", size = 11050, upload-time = "2024-12-04T17:35:26.475Z" },
+]
+
+[[package]]
+name = "sortedcontainers"
+version = "2.4.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/e8/c4/ba2f8066cceb6f23394729afe52f3bf7adec04bf9ed2c820b39e19299111/sortedcontainers-2.4.0.tar.gz", hash = "sha256:25caa5a06cc30b6b83d11423433f65d1f9d76c4c6a0c90e3379eaa43b9bfdb88", size = 30594, upload-time = "2021-05-16T22:03:42.897Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/32/46/9cb0e58b2deb7f82b84065f37f3bffeb12413f947f9388e4cac22c4621ce/sortedcontainers-2.4.0-py2.py3-none-any.whl", hash = "sha256:a163dcaede0f1c021485e957a39245190e74249897e2ae4b2aa38595db237ee0", size = 29575, upload-time = "2021-05-16T22:03:41.177Z" },
 ]
 
 [[package]]

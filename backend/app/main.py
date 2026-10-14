@@ -1,8 +1,8 @@
 #  main.py
 #  FastAPI 应用入口：装配中间件、路由与统一错误体
 
-from contextlib import asynccontextmanager
 import logging
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError

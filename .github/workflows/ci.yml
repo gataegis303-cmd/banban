@@ -1,0 +1,86 @@
+#  CI：push / PR 到 main 时验证后端测试与 iOS 构建
+#
+#  - backend：ruff lint + pytest
+#    （postgres/redis 走 service 容器；测试库由 conftest 按模型 create_all 建表，
+#     无需 alembic；Redis 测试实际走 fakeredis，service 容器仅为链路保真预留）
+#  - ios：xcodebuild 模拟器构建；以日志含 ** BUILD SUCCEEDED ** 为准，
+#    不依赖 grep 管道退出码（会误报）
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  backend:
+    name: Backend (ruff + pytest)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: banban
+          POSTGRES_PASSWORD: banban_dev_2025
+          POSTGRES_DB: banban_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U banban -d banban_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+      redis:
+        image: redis:7
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      # conftest 顶部读取该变量注入 DATABASE_URL（pydantic-settings 环境变量优先于 .env）
+      BANBAN_TEST_DATABASE_URL: postgresql+asyncpg://banban:banban_dev_2025@localhost:5432/banban_test
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: 安装 uv 与 Python 3.12
+        uses: astral-sh/setup-uv@v9
+        with:
+          python-version: "3.12"
+
+      - name: 同步依赖
+        run: uv sync --all-extras
+
+      - name: Lint（ruff）
+        run: uv run ruff check app tests
+
+      - name: 测试（pytest）
+        run: uv run pytest
+
+  ios:
+    name: iOS Build
+    runs-on: macos-latest
+    defaults:
+      run:
+        working-directory: ios
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: 构建（xcodebuild）
+        shell: bash
+        run: |
+          set -o pipefail
+          xcodebuild -project BanBan.xcodeproj -scheme BanBan \
+            -destination 'generic/platform=iOS Simulator' build 2>&1 | tee xcodebuild.log
+
+      - name: 判定 BUILD SUCCEEDED
+        if: always()
+        shell: bash
+        run: grep -q '\*\* BUILD SUCCEEDED \*\*' xcodebuild.log

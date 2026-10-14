@@ -35,10 +35,18 @@ redis_client = aioredis.from_url(settings.redis_url, decode_responses=True)
 
 
 def client_ip(request: Request) -> str:
-    """取客户端真实 IP：nginx 反代场景优先读 X-Forwarded-For 首段"""
-    forwarded = request.headers.get("x-forwarded-for")
-    if forwarded:
-        return forwarded.split(",")[0].strip()
+    """取客户端真实 IP。
+
+    仅信任反向代理追加的尾部 N 段（X-Forwarded-For 标准语义：最右为最近一跳
+    可信代理写入的客户端 IP）；N=0 时直接用 socket 对端 IP。
+    无条件信任首段会让限流被伪造头绕过（审查 F3）。
+    """
+    if settings.app_trusted_proxy_count > 0:
+        forwarded = request.headers.get("x-forwarded-for")
+        if forwarded:
+            parts = [p.strip() for p in forwarded.split(",")]
+            if len(parts) >= settings.app_trusted_proxy_count:
+                return parts[-settings.app_trusted_proxy_count]
     return request.client.host if request.client else "unknown"
 
 
