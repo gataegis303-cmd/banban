@@ -44,7 +44,7 @@ P1–P13 功能已全部落地。本计划偿还三项质量债：①对后端�
 - [x] Task 11: iOS workflow——同一文件 iOS job（xcodebuild 输出落日志文件，以含 ** BUILD SUCCEEDED ** 为准，不依赖 grep 管道退出码）
 
 ### Checkpoint 4
-- [ ] push main 触发 CI 全绿（workflow 已就绪，待提交推送后在线上验证）
+- [x] push main 触发 CI 全绿（首轮失败已修：setup-uv pin 完整版本号 + iOS 部署目标定为 17.0，第二轮 success）
 
 ## Risks and Mitigations
 

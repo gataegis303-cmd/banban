@@ -25,4 +25,4 @@
 - [x] CP1: 审查报告完成并汇报
 - [x] CP2: 修复关闭 + curl 冒烟回归
 - [x] CP3: pytest 全绿
-- [ ] CP4: CI 全绿（待 push 验证）
+- [x] CP4: CI 全绿
